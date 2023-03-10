@@ -173,7 +173,7 @@ struct decimal_t
         underlying_type resultInteger = std::abs(integerPart * rhsIntegerPart);
         underlying_type signFactor = integerPart * rhsIntegerPart >= 0 ? 1 : -1;
         // commonFraction has denominator equal to commonDenominator
-        underlying_type commonFraction = integerPart * rhsFractionPart + fractionPart * rhsIntegerPart;
+        underlying_type commonFraction = std::abs(integerPart) * rhsFractionPart + fractionPart * std::abs(rhsIntegerPart);
         resultInteger += commonFraction / denominatorInfo.first;
         commonFraction %= denominatorInfo.first;
         // from now on denominator of commonFraction equals commonDenominator*commonDenominator

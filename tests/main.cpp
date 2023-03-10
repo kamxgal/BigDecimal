@@ -649,6 +649,75 @@ bool test_dividing_by_negative_decimals()
     return true;
 }
 
+bool test_multiplying_by_negative_decimals_with_different_precision()
+{
+    decimal3d_t number0 = decimal3d_t{-10.716}; number0 *= decimal2d_t{10.11};
+    ASSERT_EQ(number0.to_string(), "-108.339");
+    ASSERT_EQ(number0.to_float(), -108.339f);
+    ASSERT_EQ(number0.to_double(), -108.339);
+
+    decimal3d_t number1 = decimal3d_t{10.716}; number1 *= decimal2d_t{-10.11};
+    ASSERT_EQ(number1.to_string(), "-108.339");
+    ASSERT_EQ(number1.to_float(), -108.339f);
+    ASSERT_EQ(number1.to_double(), -108.339);
+
+    decimal3d_t number2 = decimal3d_t{-10.716}; number2 *= decimal2d_t{-10.11};
+    ASSERT_EQ(number2.to_string(), "108.339");
+    ASSERT_EQ(number2.to_float(), 108.339f);
+    ASSERT_EQ(number2.to_double(), 108.339);
+
+    decimal2d_t number3 = decimal2d_t{-10.11}; number3 *= decimal3d_t{10.716};
+    ASSERT_EQ(number3.to_string(), "-108.34");
+    ASSERT_EQ(number3.to_float(), -108.34f);
+    ASSERT_EQ(number3.to_double(), -108.34);
+
+    decimal2d_t number4 = decimal2d_t{10.11}; number4 *= decimal3d_t{-10.716};
+    ASSERT_EQ(number4.to_string(), "-108.34");
+    ASSERT_EQ(number4.to_float(), -108.34f);
+    ASSERT_EQ(number4.to_double(), -108.34);
+
+    decimal2d_t number5 = decimal2d_t{-10.11}; number5 *= decimal3d_t{-10.716};
+    ASSERT_EQ(number5.to_string(), "108.34");
+    ASSERT_EQ(number5.to_float(), 108.34f);
+    ASSERT_EQ(number5.to_double(), 108.34);
+    return true;
+}
+
+bool test_dividing_by_negative_decimals_with_different_precision()
+{
+    decimal3d_t number0 = decimal3d_t{-102.525}; number0 /= decimal2d_t{10.33};
+    ASSERT_EQ(number0.to_string(), "-9.925");
+    ASSERT_EQ(number0.to_float(), -9.925f);
+    ASSERT_EQ(number0.to_double(), -9.925);
+
+    decimal3d_t number1 = decimal3d_t{102.525}; number1 /= decimal2d_t{-10.33};
+    ASSERT_EQ(number1.to_string(), "-9.925");
+    ASSERT_EQ(number1.to_float(), -9.925f);
+    ASSERT_EQ(number1.to_double(), -9.925);
+
+    decimal3d_t number2 = decimal3d_t{-102.525}; number2 /= decimal2d_t{-10.33};
+    ASSERT_EQ(number2.to_string(), "9.925");
+    ASSERT_EQ(number2.to_float(), 9.925f);
+    ASSERT_EQ(number2.to_double(), 9.925);
+
+    decimal2d_t number3 = decimal2d_t{-102.53}; number3 /= decimal3d_t{10.333};
+    ASSERT_EQ(number3.to_string(), "-9.92");
+    ASSERT_EQ(number3.to_float(), -9.92f);
+    ASSERT_EQ(number3.to_double(), -9.92);
+
+    decimal2d_t number4 = decimal2d_t{102.53}; number4 /= decimal3d_t{-10.333};
+    ASSERT_EQ(number4.to_string(), "-9.92");
+    ASSERT_EQ(number4.to_float(), -9.92f);
+    ASSERT_EQ(number4.to_double(), -9.92);
+
+    decimal2d_t number5 = decimal2d_t{-102.53}; number5 /= decimal3d_t{-10.333};
+    ASSERT_EQ(number5.to_string(), "9.92");
+    ASSERT_EQ(number5.to_float(), 9.92f);
+    ASSERT_EQ(number5.to_double(), 9.92);
+    return true;
+}
+
+
 int main()
 {
     EXECUTE_TEST(test_constructing_decimal_from_double_and_parsing_to_string);
@@ -681,6 +750,9 @@ int main()
 
     EXECUTE_TEST(test_multiplying_by_negative_decimals);
     EXECUTE_TEST(test_dividing_by_negative_decimals);
+
+    EXECUTE_TEST(test_multiplying_by_negative_decimals_with_different_precision);
+    EXECUTE_TEST(test_dividing_by_negative_decimals_with_different_precision);
 
     for (const auto& name : failed_tests) {
         std::cerr << "[FAILED] " << name << std::endl;
