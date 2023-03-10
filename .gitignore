@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Directories
+build
+
+# CMake files
+CMakeLists.txt.user
