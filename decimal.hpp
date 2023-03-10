@@ -213,4 +213,25 @@ private:
     nominator_t mNominator{};
 };
 
+template<typename NewUnderlyingType, int NewPrecision, typename OldUnderlyingType, int OldPrecision>
+inline typename std::enable_if<NewPrecision != OldPrecision, decimal_t<NewUnderlyingType, NewPrecision>>::type
+decimal_cast(const decimal_t<OldUnderlyingType, OldPrecision>& oldDecimal) noexcept {
+    NewUnderlyingType nominator = NewPrecision > OldPrecision ?
+                static_cast<NewUnderlyingType>(oldDecimal.nominator()) * Power10<NewUnderlyingType>(NewPrecision - OldPrecision + 1)
+              : static_cast<NewUnderlyingType>(oldDecimal.nominator()) / Power10<NewUnderlyingType>(OldPrecision - NewPrecision - 1);
+    int lastSignificantDigit = std::abs(nominator) % 10;
+    int signFactor = nominator >= 0 ? 1 : -1;
+    return decimal_t<NewUnderlyingType, NewPrecision>(typename decimal_t<NewUnderlyingType, NewPrecision>::nominator_t{
+            nominator / 10 + (lastSignificantDigit >= 5 ? signFactor : 0)
+        });
+}
+
+template<typename NewUnderlyingType, int Precision, typename OldUnderlyingType, int OldPrecision>
+inline typename std::enable_if<Precision == OldPrecision, decimal_t<NewUnderlyingType, Precision>>::type
+decimal_cast(const decimal_t<OldUnderlyingType, OldPrecision>& oldDecimal) noexcept {
+    return decimal_t<NewUnderlyingType, Precision>(typename decimal_t<NewUnderlyingType, Precision>::nominator_t{
+            static_cast<NewUnderlyingType>(oldDecimal.nominator())
+        });
+}
+
 }  // namespace big_decimal

@@ -51,7 +51,7 @@ std::vector<std::string> failed_tests;
 
 #define EXECUTE_TEST(name) \
     std::cout << "[BEGIN]\t" << #name << std::endl; \
-    if (bool res = name()) { \
+    if (name()) { \
         std::cout << "[SUCCESS]\t" << #name << std::endl; \
     } else { \
         std::cout << "[FAILED]\t" << #name << std::endl; \
@@ -717,6 +717,147 @@ bool test_dividing_by_negative_decimals_with_different_precision()
     return true;
 }
 
+bool test_casting_precision_down_positive_decimals()
+{
+    const decimal3d_t number3d = decimal3d_t{102.525};
+    ASSERT_EQ(number3d.to_string(), "102.525");
+    ASSERT_EQ(number3d.to_float(), 102.525f);
+    ASSERT_EQ(number3d.to_double(), 102.525);
+
+    const auto casted2d = big_decimal::decimal_cast<int, 2>(number3d);
+    ASSERT_EQ(casted2d.to_string(), "102.53");
+    ASSERT_EQ(casted2d.to_float(), 102.53f);
+    ASSERT_EQ(casted2d.to_double(), 102.53);
+
+    const auto casted1d = big_decimal::decimal_cast<int, 1>(number3d);
+    ASSERT_EQ(casted1d.to_string(), "102.5");
+    ASSERT_EQ(casted1d.to_float(), 102.5f);
+    ASSERT_EQ(casted1d.to_double(), 102.5);
+    return true;
+}
+
+bool test_casting_precision_up_positive_decimals()
+{
+    const decimal2d_t number2d = decimal2d_t{102.53};
+
+    const auto casted3d = big_decimal::decimal_cast<int, 3>(number2d);
+    ASSERT_EQ(casted3d.to_string(), "102.530");
+    ASSERT_EQ(casted3d.to_float(), 102.53f);
+    ASSERT_EQ(casted3d.to_double(), 102.53);
+    ASSERT_EQ(casted3d.integer_part(), 102);
+    ASSERT_EQ(casted3d.fraction_part(), 530);
+
+    const auto casted4d = big_decimal::decimal_cast<int, 4>(number2d);
+    ASSERT_EQ(casted4d.to_string(), "102.5300");
+    ASSERT_EQ(casted4d.to_float(), 102.53f);
+    ASSERT_EQ(casted4d.to_double(), 102.53);
+    ASSERT_EQ(casted4d.integer_part(), 102);
+    ASSERT_EQ(casted4d.fraction_part(), 5300);
+    return true;
+}
+
+bool test_casting_precision_down_negative_decimals()
+{
+    const decimal3d_t number3d = decimal3d_t{-102.525};
+    ASSERT_EQ(number3d.to_string(), "-102.525");
+    ASSERT_EQ(number3d.to_float(), -102.525f);
+    ASSERT_EQ(number3d.to_double(), -102.525);
+
+    const auto casted2d = big_decimal::decimal_cast<int, 2>(number3d);
+    ASSERT_EQ(casted2d.to_string(), "-102.53");
+    ASSERT_EQ(casted2d.to_float(), -102.53f);
+    ASSERT_EQ(casted2d.to_double(), -102.53);
+
+    const auto casted1d = big_decimal::decimal_cast<int, 1>(number3d);
+    ASSERT_EQ(casted1d.to_string(), "-102.5");
+    ASSERT_EQ(casted1d.to_float(), -102.5f);
+    ASSERT_EQ(casted1d.to_double(), -102.5);
+    return true;
+}
+
+bool test_casting_precision_up_negative_decimals()
+{
+    const decimal2d_t number2d = decimal2d_t{-102.53};
+
+    const auto casted3d = big_decimal::decimal_cast<int, 3>(number2d);
+    ASSERT_EQ(casted3d.to_string(), "-102.530");
+    ASSERT_EQ(casted3d.to_float(), -102.53f);
+    ASSERT_EQ(casted3d.to_double(), -102.53);
+    ASSERT_EQ(casted3d.integer_part(), -102);
+    ASSERT_EQ(casted3d.fraction_part(), 530);
+
+    const auto casted4d = big_decimal::decimal_cast<int, 4>(number2d);
+    ASSERT_EQ(casted4d.to_string(), "-102.5300");
+    ASSERT_EQ(casted4d.to_float(), -102.53f);
+    ASSERT_EQ(casted4d.to_double(), -102.53);
+    ASSERT_EQ(casted4d.integer_part(), -102);
+    ASSERT_EQ(casted4d.fraction_part(), 5300);
+    return true;
+}
+
+bool test_casting_to_different_underlying_type()
+{
+    const auto number2dln = big_decimal::decimal_t<long, 2>{-102.53};
+    ASSERT_EQ(number2dln.to_string(), "-102.53");
+    ASSERT_EQ(number2dln.to_float(), -102.53f);
+    ASSERT_EQ(number2dln.to_double(), -102.53);
+    ASSERT_EQ(number2dln.integer_part(), -102);
+    ASSERT_EQ(number2dln.fraction_part(), 53);
+
+    const auto casted2din = big_decimal::decimal_cast<int, 2>(number2dln);
+    ASSERT_EQ(casted2din.to_string(), "-102.53");
+    ASSERT_EQ(casted2din.to_float(), -102.53f);
+    ASSERT_EQ(casted2din.to_double(), -102.53);
+    ASSERT_EQ(casted2din.integer_part(), -102);
+    ASSERT_EQ(casted2din.fraction_part(), 53);
+
+    const auto number2dlp = big_decimal::decimal_t<long, 2>{102.53};
+    ASSERT_EQ(number2dlp.to_string(), "102.53");
+    ASSERT_EQ(number2dlp.to_float(), 102.53f);
+    ASSERT_EQ(number2dlp.to_double(), 102.53);
+    ASSERT_EQ(number2dlp.integer_part(), 102);
+    ASSERT_EQ(number2dlp.fraction_part(), 53);
+
+    const auto casted2dip = big_decimal::decimal_cast<int, 2>(number2dlp);
+    ASSERT_EQ(casted2dip.to_string(), "102.53");
+    ASSERT_EQ(casted2dip.to_float(), 102.53f);
+    ASSERT_EQ(casted2dip.to_double(), 102.53);
+    ASSERT_EQ(casted2dip.integer_part(), 102);
+    ASSERT_EQ(casted2dip.fraction_part(), 53);
+    return true;
+}
+
+bool test_casting_to_different_precision()
+{
+    const auto number2dln = big_decimal::decimal_t<long, 2>{-102.53};
+    ASSERT_EQ(number2dln.to_string(), "-102.53");
+    ASSERT_EQ(number2dln.to_float(), -102.53f);
+    ASSERT_EQ(number2dln.to_double(), -102.53);
+    ASSERT_EQ(number2dln.integer_part(), -102);
+    ASSERT_EQ(number2dln.fraction_part(), 53);
+
+    const auto casted2din = big_decimal::decimal_cast<long, 2>(number2dln);
+    ASSERT_EQ(casted2din.to_string(), "-102.53");
+    ASSERT_EQ(casted2din.to_float(), -102.53f);
+    ASSERT_EQ(casted2din.to_double(), -102.53);
+    ASSERT_EQ(casted2din.integer_part(), -102);
+    ASSERT_EQ(casted2din.fraction_part(), 53);
+
+    const auto number2dlp = big_decimal::decimal_t<long, 2>{102.53};
+    ASSERT_EQ(number2dlp.to_string(), "102.53");
+    ASSERT_EQ(number2dlp.to_float(), 102.53f);
+    ASSERT_EQ(number2dlp.to_double(), 102.53);
+    ASSERT_EQ(number2dlp.integer_part(), 102);
+    ASSERT_EQ(number2dlp.fraction_part(), 53);
+
+    const auto casted2dip = big_decimal::decimal_cast<long, 2>(number2dlp);
+    ASSERT_EQ(casted2dip.to_string(), "102.53");
+    ASSERT_EQ(casted2dip.to_float(), 102.53f);
+    ASSERT_EQ(casted2dip.to_double(), 102.53);
+    ASSERT_EQ(casted2dip.integer_part(), 102);
+    ASSERT_EQ(casted2dip.fraction_part(), 53);
+    return true;
+}
 
 int main()
 {
@@ -753,6 +894,15 @@ int main()
 
     EXECUTE_TEST(test_multiplying_by_negative_decimals_with_different_precision);
     EXECUTE_TEST(test_dividing_by_negative_decimals_with_different_precision);
+
+    EXECUTE_TEST(test_casting_precision_down_positive_decimals);
+    EXECUTE_TEST(test_casting_precision_up_positive_decimals);
+
+    EXECUTE_TEST(test_casting_precision_down_negative_decimals);
+    EXECUTE_TEST(test_casting_precision_up_negative_decimals);
+
+    EXECUTE_TEST(test_casting_to_different_underlying_type);
+    EXECUTE_TEST(test_casting_to_different_precision);
 
     for (const auto& name : failed_tests) {
         std::cerr << "[FAILED] " << name << std::endl;
