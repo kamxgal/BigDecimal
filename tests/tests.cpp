@@ -928,19 +928,5 @@ int main()
         std::cerr << "[FAILED] " << name << std::endl;
     }
 
-    const auto number4d = big_decimal::decimal_t<int64_t, 4>{"10.2346"};
-    // It is possible to case one decimal to another using decimal_cast
-    const auto casted5d = big_decimal::decimal_cast<int64_t, 5>(number4d);  // 5 digits
-    const auto casted3d = big_decimal::decimal_cast<int64_t, 3>(number4d);  // 3 digits
-    const auto casted1d = big_decimal::decimal_cast<int64_t, 1>(number4d);  // 1 digit
-    const auto casted0d = big_decimal::decimal_cast<int64_t, 0>(number4d);  // 0 digits
-
-    // Streaming to output
-    std::cout << number4d << std::endl;  // "10.2346"
-    std::cout << casted5d << std::endl;  // "10.23460"
-    std::cout << casted3d << std::endl;  // "10.235"
-    std::cout << casted1d << std::endl;  // "10.2"
-    std::cout << casted0d << std::endl;  // "10"
-
     return 0;
 }
