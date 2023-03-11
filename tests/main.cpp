@@ -46,6 +46,7 @@ using decimal2d_t = big_decimal::decimal_t<long, 2>;
 using decimal3d_t = big_decimal::decimal_t<long, 3>;
 
 #define ASSERT_EQ(a, b) if ((a) != (b)) { std::cout << "Line " << __LINE__ << ": ASSERT_EQ failed: " << a << " != " << b << std::endl; return false; }
+#define ASSERT_NEQ(a, b) if ((a) == (b)) { std::cout << "Line " << __LINE__ << ": ASSERT_NEQ failed: " << a << " == " << b << std::endl; return false; }
 
 std::vector<std::string> failed_tests;
 
@@ -859,6 +860,23 @@ bool test_casting_to_different_precision()
     return true;
 }
 
+bool test_comparing_decimals()
+{
+    const auto number0 = big_decimal::decimal_t<int64_t, 3>{"10.2346"};
+    const auto number1 = big_decimal::decimal_t<int64_t, 3>{10.2346};
+    const auto number2 = big_decimal::decimal_t<int64_t, 3>{10.2346f};
+    const auto number3 = big_decimal::decimal_t<int64_t, 3>{10, 2346};
+
+    const auto number4 = big_decimal::decimal_t<int64_t, 3>{999, 999};
+
+    ASSERT_EQ(number0, number1);
+    ASSERT_EQ(number1, number2);
+    ASSERT_EQ(number2, number3);
+
+    ASSERT_NEQ(number0, number4);
+    return true;
+}
+
 int main()
 {
     EXECUTE_TEST(test_constructing_decimal_from_double_and_parsing_to_string);
@@ -904,9 +922,25 @@ int main()
     EXECUTE_TEST(test_casting_to_different_underlying_type);
     EXECUTE_TEST(test_casting_to_different_precision);
 
+    EXECUTE_TEST(test_comparing_decimals);
+
     for (const auto& name : failed_tests) {
         std::cerr << "[FAILED] " << name << std::endl;
     }
+
+    const auto number4d = big_decimal::decimal_t<int64_t, 4>{"10.2346"};
+    // It is possible to case one decimal to another using decimal_cast
+    const auto casted5d = big_decimal::decimal_cast<int64_t, 5>(number4d);  // 5 digits
+    const auto casted3d = big_decimal::decimal_cast<int64_t, 3>(number4d);  // 3 digits
+    const auto casted1d = big_decimal::decimal_cast<int64_t, 1>(number4d);  // 1 digit
+    const auto casted0d = big_decimal::decimal_cast<int64_t, 0>(number4d);  // 0 digits
+
+    // Streaming to output
+    std::cout << number4d << std::endl;  // "10.2346"
+    std::cout << casted5d << std::endl;  // "10.23460"
+    std::cout << casted3d << std::endl;  // "10.235"
+    std::cout << casted1d << std::endl;  // "10.2"
+    std::cout << casted0d << std::endl;  // "10"
 
     return 0;
 }

@@ -201,6 +201,21 @@ struct decimal_t
         return *this;
     }
 
+    friend bool operator==(const decimal_t<underlying_type, PRECISION>& lhs,
+                           const decimal_t<underlying_type, PRECISION>& rhs) {
+        return lhs.mNominator.value == rhs.mNominator.value;
+    }
+
+    friend bool operator!=(const decimal_t<underlying_type, PRECISION>& lhs,
+                           const decimal_t<underlying_type, PRECISION>& rhs) {
+        return lhs.mNominator.value != rhs.mNominator.value;
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const decimal_t<underlying_type, PRECISION>& decimal) {
+        out << decimal.to_string();
+        return out;
+    }
+
     float to_float() const { return static_cast<float>(mNominator.value) / DENOMINATOR; }
     double to_double() const { return static_cast<double>(mNominator.value) / DENOMINATOR; }
     std::string to_string() const {

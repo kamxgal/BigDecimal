@@ -13,3 +13,7 @@ add_custom_target(BigDecimal
 add_executable(BigDecimalTests
     tests/main.cpp
 )
+
+add_executable(BigDecimalExamples
+    examples/examples.cpp
+)
