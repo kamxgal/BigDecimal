@@ -34,7 +34,7 @@ std::cout << double1 << std::endl;  // 10.235
 
 It is possible to cast one decimal to another using decimal_cast:
 ```
-const auto number4d = big_decimal::decimal_t<int64_t, 4>{"10.2346"};
+const auto number4d = strict::decimal_t<int64_t, 4>{"10.2346"};
     
 const auto casted5d = strict::decimal_cast<int64_t, 5>(number4d);  // 5 digits fraction
 const auto casted3d = strict::decimal_cast<int64_t, 3>(number4d);  // 3 digits fraction
