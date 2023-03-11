@@ -1,6 +1,18 @@
 # StrictDecimal
 Header-only decimal implementation for C++ which stores strict values and can be used for example for financial purposes.
 
+Two types of data are available for the user:
+1. strict::decimal_t - to store decimals in range which uses all capabilities of defined underlying data type
+2. strict::ranged_decimal_t - to store decimals in range defined by user
+
+When creating a decimal user provides an underlying data type to store values and precision of the decimal. Based on that a denominator is calculated in compile time and member variable stores only nominator of given number. Decimals are rounded in such way that if the last digit is less than 5, the previous digit is rounded down. Otherwise it is rounded up.
+
+When using strict::ranged_decimal_t if the value goes beyong provided range it is clamped.
+
+Shortly, writing `auto number = strict::decimal_t<int64_t, 2>()` creates a decimal which stores nominator in `in64_t` with precision of two decimal digits which means that the denominator (accessed via strict::decimal_t<int64_t, 2>::DENOMINATOR) is equal to `10^2 = 100`.
+
+Defining `auto number = strict::ranged_decimal_t<int64_t, 2, -1000, 1000>()` creates a number which stores nominator in `int64_t` with precision of 2 decimal digits and with certainty that it is in range between -1000 and 1000.
+
 Example:
 
 ```
