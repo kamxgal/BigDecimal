@@ -37,27 +37,11 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 #include "../decimal.hpp"
-
-#include <iostream>
-#include <vector>
+#include "test_macros.hpp"
 
 using namespace std;
-using decimal2d_t = big_decimal::decimal_t<long, 2>;
-using decimal3d_t = big_decimal::decimal_t<long, 3>;
-
-#define ASSERT_EQ(a, b) if ((a) != (b)) { std::cout << "Line " << __LINE__ << ": ASSERT_EQ failed: " << a << " != " << b << std::endl; return false; }
-#define ASSERT_NEQ(a, b) if ((a) == (b)) { std::cout << "Line " << __LINE__ << ": ASSERT_NEQ failed: " << a << " == " << b << std::endl; return false; }
-
-std::vector<std::string> failed_tests;
-
-#define EXECUTE_TEST(name) \
-    std::cout << "[BEGIN]\t" << #name << std::endl; \
-    if (name()) { \
-        std::cout << "[SUCCESS]\t" << #name << std::endl; \
-    } else { \
-        std::cout << "[FAILED]\t" << #name << std::endl; \
-        failed_tests.push_back(std::string(#name)); \
-    }
+using decimal2d_t = big_decimal::decimal_t<int32_t, 2>;
+using decimal3d_t = big_decimal::decimal_t<int32_t, 3>;
 
 bool test_constructing_decimal_from_double_and_parsing_to_string()
 {
@@ -875,58 +859,4 @@ bool test_comparing_decimals()
 
     ASSERT_NEQ(number0, number4);
     return true;
-}
-
-int main()
-{
-    EXECUTE_TEST(test_constructing_decimal_from_double_and_parsing_to_string);
-    EXECUTE_TEST(test_constructing_decimal_from_double_with_fraction_part_around_half);
-    EXECUTE_TEST(test_constructing_decimal_from_float_and_parsing_to_float);
-    EXECUTE_TEST(test_constructing_decimal_from_double_and_parsing_to_double);
-    EXECUTE_TEST(test_constructing_decimal_from_integer_and_parsing);
-    EXECUTE_TEST(test_constructing_decimal_from_direct_constructor_and_parsing);
-    EXECUTE_TEST(test_constructing_decimal_from_string_and_parsing);
-
-    EXECUTE_TEST(test_adding_two_decimals);
-    EXECUTE_TEST(test_subtracting_two_decimals);
-    EXECUTE_TEST(test_multiplying_two_decimals);
-    EXECUTE_TEST(test_dividing_two_decimals);
-
-    EXECUTE_TEST(test_adding_decimal);
-    EXECUTE_TEST(test_subtracting_decimal);
-    EXECUTE_TEST(test_multiplying_by_decimal);
-    EXECUTE_TEST(test_dividing_by_decimal);
-
-    EXECUTE_TEST(test_getting_integer_and_fraction_part);
-
-    EXECUTE_TEST(test_multiplying_by_decimal_with_different_precision);
-    EXECUTE_TEST(test_dividing_by_decimal_with_different_precision);
-
-    EXECUTE_TEST(test_creation_of_negative_numbers);
-    EXECUTE_TEST(test_adding_negative_decimals);
-    EXECUTE_TEST(test_subtracking_negative_decimals);
-    EXECUTE_TEST(test_multiplying_negative_decimals);
-
-    EXECUTE_TEST(test_multiplying_by_negative_decimals);
-    EXECUTE_TEST(test_dividing_by_negative_decimals);
-
-    EXECUTE_TEST(test_multiplying_by_negative_decimals_with_different_precision);
-    EXECUTE_TEST(test_dividing_by_negative_decimals_with_different_precision);
-
-    EXECUTE_TEST(test_casting_precision_down_positive_decimals);
-    EXECUTE_TEST(test_casting_precision_up_positive_decimals);
-
-    EXECUTE_TEST(test_casting_precision_down_negative_decimals);
-    EXECUTE_TEST(test_casting_precision_up_negative_decimals);
-
-    EXECUTE_TEST(test_casting_to_different_underlying_type);
-    EXECUTE_TEST(test_casting_to_different_precision);
-
-    EXECUTE_TEST(test_comparing_decimals);
-
-    for (const auto& name : failed_tests) {
-        std::cerr << "[FAILED] " << name << std::endl;
-    }
-
-    return 0;
 }

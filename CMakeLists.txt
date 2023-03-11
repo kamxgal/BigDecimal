@@ -11,7 +11,12 @@ add_custom_target(BigDecimal
 )
 
 add_executable(BigDecimalTests
-    tests/tests.cpp
+    tests/decimal_tests.hpp
+    tests/decimal_tests.cpp
+    tests/main.cpp
+    tests/ranged_decimal_tests.hpp
+    tests/ranged_decimal_tests.cpp
+    tests/test_macros.hpp
 )
 
 add_executable(BigDecimalExamples
