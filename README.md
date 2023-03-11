@@ -32,7 +32,7 @@ std::cout << float1 << std::endl;  // 10.235f
 std::cout << double1 << std::endl;  // 10.235
 ```
 
-It is possible to case one decimal to another using decimal_cast:
+It is possible to cast one decimal to another using decimal_cast:
 ```
 const auto number4d = big_decimal::decimal_t<int64_t, 4>{"10.2346"};
     
