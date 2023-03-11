@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(BigDecimal LANGUAGES CXX)
+project(StrictDecimal LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_custom_target(BigDecimal
+add_custom_target(StrictDecimal
     SOURCES
     decimal.hpp
 )
 
-add_executable(BigDecimalTests
+add_executable(StrictDecimalTests
     tests/decimal_tests.hpp
     tests/decimal_tests.cpp
     tests/main.cpp
@@ -19,6 +19,6 @@ add_executable(BigDecimalTests
     tests/test_macros.hpp
 )
 
-add_executable(BigDecimalExamples
+add_executable(StrictDecimalExamples
     examples/examples.cpp
 )

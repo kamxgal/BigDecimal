@@ -6,7 +6,7 @@
  * Copyright (C) 2023 Kamil Galant. All Rights Reserved.
  *
  * License
- * BigDecimal is released under BSD-3-Clause license.
+ * StrictDecimal is released under BSD-3-Clause license.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -43,10 +43,10 @@
 int main(int argc, char* argv[])
 {
     // Numbers below are rounded to 3 decimal digits and each of them are equal:
-    const auto number0 = big_decimal::decimal_t<int64_t, 3>{"10.2346"};  // "10.235" after rounding to 3 digits
-    const auto number1 = big_decimal::decimal_t<int64_t, 3>{10.2346};
-    const auto number2 = big_decimal::decimal_t<int64_t, 3>{10.2346f};
-    const auto number3 = big_decimal::decimal_t<int64_t, 3>{10, 2346};
+    const auto number0 = strict::decimal_t<int64_t, 3>{"10.2346"};  // "10.235" after rounding to 3 digits
+    const auto number1 = strict::decimal_t<int64_t, 3>{10.2346};
+    const auto number2 = strict::decimal_t<int64_t, 3>{10.2346f};
+    const auto number3 = strict::decimal_t<int64_t, 3>{10, 2346};
 
     std::cout << std::boolalpha;
     std::cout << (number0 == number1) << std::endl;  // true
@@ -65,12 +65,12 @@ int main(int argc, char* argv[])
     std::cout << std::endl;
 
     // It is possible to case one decimal to another using decimal_cast:
-    const auto number4d = big_decimal::decimal_t<int64_t, 4>{"10.2346"};
+    const auto number4d = strict::decimal_t<int64_t, 4>{"10.2346"};
 
-    const auto casted5d = big_decimal::decimal_cast<int64_t, 5>(number4d);  // 5 digits fraction
-    const auto casted3d = big_decimal::decimal_cast<int64_t, 3>(number4d);  // 3 digits fraction
-    const auto casted1d = big_decimal::decimal_cast<int64_t, 1>(number4d);  // 1 digits fraction
-    const auto casted0d = big_decimal::decimal_cast<int64_t, 0>(number4d);  // 0 digits fraction
+    const auto casted5d = strict::decimal_cast<int64_t, 5>(number4d);  // 5 digits fraction
+    const auto casted3d = strict::decimal_cast<int64_t, 3>(number4d);  // 3 digits fraction
+    const auto casted1d = strict::decimal_cast<int64_t, 1>(number4d);  // 1 digits fraction
+    const auto casted0d = strict::decimal_cast<int64_t, 0>(number4d);  // 0 digits fraction
 
     // Streaming decimals to output (automatically parsed to std::string):
     std::cout << number4d << std::endl;  // "10.2346"

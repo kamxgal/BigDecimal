@@ -6,7 +6,7 @@
  * Copyright (C) 2023 Kamil Galant. All Rights Reserved.
  *
  * License
- * BigDecimal is released under BSD-3-Clause license.
+ * StrictDecimal is released under BSD-3-Clause license.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -40,8 +40,8 @@
 #include "test_macros.hpp"
 
 using namespace std;
-using decimal2d_t = big_decimal::decimal_t<int32_t, 2>;
-using decimal3d_t = big_decimal::decimal_t<int32_t, 3>;
+using decimal2d_t = strict::decimal_t<int32_t, 2>;
+using decimal3d_t = strict::decimal_t<int32_t, 3>;
 
 bool test_constructing_decimal_from_double_and_parsing_to_string()
 {
@@ -448,8 +448,8 @@ bool test_multiplying_by_decimal_with_different_precision()
     ASSERT_EQ(number0.to_double(), 47.24);
     ASSERT_EQ(number0.to_float(), 47.24f);
 
-    big_decimal::decimal_t<int64_t, 8> first(0, 20000);
-    big_decimal::decimal_t<int64_t, 4> second(0, 1);
+    strict::decimal_t<int64_t, 8> first(0, 20000);
+    strict::decimal_t<int64_t, 4> second(0, 1);
     ASSERT_EQ(first.to_string(), "0.00020000");
     ASSERT_EQ(first.to_float(), 0.0002f);
     ASSERT_EQ(first.to_double(), 0.0002);
@@ -477,8 +477,8 @@ bool test_dividing_by_decimal_with_different_precision()
     ASSERT_EQ(number1.to_double(), 5.0);
     ASSERT_EQ(number1.to_float(), 5.0f);
 
-    big_decimal::decimal_t<int64_t, 8> first(0, 20000);
-    big_decimal::decimal_t<int64_t, 4> second(10000, 0);
+    strict::decimal_t<int64_t, 8> first(0, 20000);
+    strict::decimal_t<int64_t, 4> second(10000, 0);
     ASSERT_EQ(first.to_string(), "0.00020000");
     ASSERT_EQ(first.to_float(), 0.0002f);
     ASSERT_EQ(first.to_double(), 0.0002);
@@ -709,12 +709,12 @@ bool test_casting_precision_down_positive_decimals()
     ASSERT_EQ(number3d.to_float(), 102.525f);
     ASSERT_EQ(number3d.to_double(), 102.525);
 
-    const auto casted2d = big_decimal::decimal_cast<int, 2>(number3d);
+    const auto casted2d = strict::decimal_cast<int, 2>(number3d);
     ASSERT_EQ(casted2d.to_string(), "102.53");
     ASSERT_EQ(casted2d.to_float(), 102.53f);
     ASSERT_EQ(casted2d.to_double(), 102.53);
 
-    const auto casted1d = big_decimal::decimal_cast<int, 1>(number3d);
+    const auto casted1d = strict::decimal_cast<int, 1>(number3d);
     ASSERT_EQ(casted1d.to_string(), "102.5");
     ASSERT_EQ(casted1d.to_float(), 102.5f);
     ASSERT_EQ(casted1d.to_double(), 102.5);
@@ -725,14 +725,14 @@ bool test_casting_precision_up_positive_decimals()
 {
     const decimal2d_t number2d = decimal2d_t{102.53};
 
-    const auto casted3d = big_decimal::decimal_cast<int, 3>(number2d);
+    const auto casted3d = strict::decimal_cast<int, 3>(number2d);
     ASSERT_EQ(casted3d.to_string(), "102.530");
     ASSERT_EQ(casted3d.to_float(), 102.53f);
     ASSERT_EQ(casted3d.to_double(), 102.53);
     ASSERT_EQ(casted3d.integer_part(), 102);
     ASSERT_EQ(casted3d.fraction_part(), 530);
 
-    const auto casted4d = big_decimal::decimal_cast<int, 4>(number2d);
+    const auto casted4d = strict::decimal_cast<int, 4>(number2d);
     ASSERT_EQ(casted4d.to_string(), "102.5300");
     ASSERT_EQ(casted4d.to_float(), 102.53f);
     ASSERT_EQ(casted4d.to_double(), 102.53);
@@ -748,12 +748,12 @@ bool test_casting_precision_down_negative_decimals()
     ASSERT_EQ(number3d.to_float(), -102.525f);
     ASSERT_EQ(number3d.to_double(), -102.525);
 
-    const auto casted2d = big_decimal::decimal_cast<int, 2>(number3d);
+    const auto casted2d = strict::decimal_cast<int, 2>(number3d);
     ASSERT_EQ(casted2d.to_string(), "-102.53");
     ASSERT_EQ(casted2d.to_float(), -102.53f);
     ASSERT_EQ(casted2d.to_double(), -102.53);
 
-    const auto casted1d = big_decimal::decimal_cast<int, 1>(number3d);
+    const auto casted1d = strict::decimal_cast<int, 1>(number3d);
     ASSERT_EQ(casted1d.to_string(), "-102.5");
     ASSERT_EQ(casted1d.to_float(), -102.5f);
     ASSERT_EQ(casted1d.to_double(), -102.5);
@@ -764,14 +764,14 @@ bool test_casting_precision_up_negative_decimals()
 {
     const decimal2d_t number2d = decimal2d_t{-102.53};
 
-    const auto casted3d = big_decimal::decimal_cast<int, 3>(number2d);
+    const auto casted3d = strict::decimal_cast<int, 3>(number2d);
     ASSERT_EQ(casted3d.to_string(), "-102.530");
     ASSERT_EQ(casted3d.to_float(), -102.53f);
     ASSERT_EQ(casted3d.to_double(), -102.53);
     ASSERT_EQ(casted3d.integer_part(), -102);
     ASSERT_EQ(casted3d.fraction_part(), 530);
 
-    const auto casted4d = big_decimal::decimal_cast<int, 4>(number2d);
+    const auto casted4d = strict::decimal_cast<int, 4>(number2d);
     ASSERT_EQ(casted4d.to_string(), "-102.5300");
     ASSERT_EQ(casted4d.to_float(), -102.53f);
     ASSERT_EQ(casted4d.to_double(), -102.53);
@@ -782,28 +782,28 @@ bool test_casting_precision_up_negative_decimals()
 
 bool test_casting_to_different_underlying_type()
 {
-    const auto number2dln = big_decimal::decimal_t<long, 2>{-102.53};
+    const auto number2dln = strict::decimal_t<long, 2>{-102.53};
     ASSERT_EQ(number2dln.to_string(), "-102.53");
     ASSERT_EQ(number2dln.to_float(), -102.53f);
     ASSERT_EQ(number2dln.to_double(), -102.53);
     ASSERT_EQ(number2dln.integer_part(), -102);
     ASSERT_EQ(number2dln.fraction_part(), 53);
 
-    const auto casted2din = big_decimal::decimal_cast<int, 2>(number2dln);
+    const auto casted2din = strict::decimal_cast<int, 2>(number2dln);
     ASSERT_EQ(casted2din.to_string(), "-102.53");
     ASSERT_EQ(casted2din.to_float(), -102.53f);
     ASSERT_EQ(casted2din.to_double(), -102.53);
     ASSERT_EQ(casted2din.integer_part(), -102);
     ASSERT_EQ(casted2din.fraction_part(), 53);
 
-    const auto number2dlp = big_decimal::decimal_t<long, 2>{102.53};
+    const auto number2dlp = strict::decimal_t<long, 2>{102.53};
     ASSERT_EQ(number2dlp.to_string(), "102.53");
     ASSERT_EQ(number2dlp.to_float(), 102.53f);
     ASSERT_EQ(number2dlp.to_double(), 102.53);
     ASSERT_EQ(number2dlp.integer_part(), 102);
     ASSERT_EQ(number2dlp.fraction_part(), 53);
 
-    const auto casted2dip = big_decimal::decimal_cast<int, 2>(number2dlp);
+    const auto casted2dip = strict::decimal_cast<int, 2>(number2dlp);
     ASSERT_EQ(casted2dip.to_string(), "102.53");
     ASSERT_EQ(casted2dip.to_float(), 102.53f);
     ASSERT_EQ(casted2dip.to_double(), 102.53);
@@ -814,28 +814,28 @@ bool test_casting_to_different_underlying_type()
 
 bool test_casting_to_different_precision()
 {
-    const auto number2dln = big_decimal::decimal_t<long, 2>{-102.53};
+    const auto number2dln = strict::decimal_t<long, 2>{-102.53};
     ASSERT_EQ(number2dln.to_string(), "-102.53");
     ASSERT_EQ(number2dln.to_float(), -102.53f);
     ASSERT_EQ(number2dln.to_double(), -102.53);
     ASSERT_EQ(number2dln.integer_part(), -102);
     ASSERT_EQ(number2dln.fraction_part(), 53);
 
-    const auto casted2din = big_decimal::decimal_cast<long, 2>(number2dln);
+    const auto casted2din = strict::decimal_cast<long, 2>(number2dln);
     ASSERT_EQ(casted2din.to_string(), "-102.53");
     ASSERT_EQ(casted2din.to_float(), -102.53f);
     ASSERT_EQ(casted2din.to_double(), -102.53);
     ASSERT_EQ(casted2din.integer_part(), -102);
     ASSERT_EQ(casted2din.fraction_part(), 53);
 
-    const auto number2dlp = big_decimal::decimal_t<long, 2>{102.53};
+    const auto number2dlp = strict::decimal_t<long, 2>{102.53};
     ASSERT_EQ(number2dlp.to_string(), "102.53");
     ASSERT_EQ(number2dlp.to_float(), 102.53f);
     ASSERT_EQ(number2dlp.to_double(), 102.53);
     ASSERT_EQ(number2dlp.integer_part(), 102);
     ASSERT_EQ(number2dlp.fraction_part(), 53);
 
-    const auto casted2dip = big_decimal::decimal_cast<long, 2>(number2dlp);
+    const auto casted2dip = strict::decimal_cast<long, 2>(number2dlp);
     ASSERT_EQ(casted2dip.to_string(), "102.53");
     ASSERT_EQ(casted2dip.to_float(), 102.53f);
     ASSERT_EQ(casted2dip.to_double(), 102.53);
@@ -846,12 +846,12 @@ bool test_casting_to_different_precision()
 
 bool test_comparing_decimals()
 {
-    const auto number0 = big_decimal::decimal_t<int64_t, 3>{"10.2346"};
-    const auto number1 = big_decimal::decimal_t<int64_t, 3>{10.2346};
-    const auto number2 = big_decimal::decimal_t<int64_t, 3>{10.2346f};
-    const auto number3 = big_decimal::decimal_t<int64_t, 3>{10, 2346};
+    const auto number0 = strict::decimal_t<int64_t, 3>{"10.2346"};
+    const auto number1 = strict::decimal_t<int64_t, 3>{10.2346};
+    const auto number2 = strict::decimal_t<int64_t, 3>{10.2346f};
+    const auto number3 = strict::decimal_t<int64_t, 3>{10, 2346};
 
-    const auto number4 = big_decimal::decimal_t<int64_t, 3>{999, 999};
+    const auto number4 = strict::decimal_t<int64_t, 3>{999, 999};
 
     ASSERT_EQ(number0, number1);
     ASSERT_EQ(number1, number2);

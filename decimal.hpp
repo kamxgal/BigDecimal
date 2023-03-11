@@ -6,7 +6,7 @@
  * Copyright (C) 2023 Kamil Galant. All Rights Reserved.
  *
  * License
- * BigDecimal is released under BSD-3-Clause license.
+ * StrictDecimal is released under BSD-3-Clause license.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -47,7 +47,7 @@
 #include <sstream>
 
 
-namespace big_decimal
+namespace strict
 {
 
 template<typename RetT>
@@ -371,4 +371,4 @@ decimal_cast(const decimal_t<OldUnderlyingType, OldPrecision>& oldDecimal) noexc
         });
 }
 
-}  // namespace big_decimal
+}  // namespace strict
