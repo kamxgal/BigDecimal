@@ -52,9 +52,25 @@ namespace strict
 
 template<typename RetT>
 constexpr RetT Power10(int n) noexcept {
-    RetT res = static_cast<RetT>(1);
-    for (int i=1; i<=n; ++i) {
-        res *= static_cast<RetT>(10);
+    const RetT lookup[] = {
+        static_cast<RetT>(1), // 10^0
+        static_cast<RetT>(10), // 10^1
+        static_cast<RetT>(100), // 10^2
+        static_cast<RetT>(1000), // 10^3
+        static_cast<RetT>(10000), // 10^4
+        static_cast<RetT>(100000), // 10^5
+        static_cast<RetT>(1000000), // 10^6
+        static_cast<RetT>(10000000), // 10^7
+        static_cast<RetT>(100000000), // 10^8
+        static_cast<RetT>(1000000000), // 10^9
+        static_cast<RetT>(10000000000), // 10^10
+    };
+    if (n <= 10) {
+        return lookup[n];
+    }
+    RetT res = lookup[n % 10];
+    for (int i=0; i<(n/10); ++i) {
+        res *= lookup[10];
     }
     return res;
 }
@@ -73,17 +89,21 @@ struct decimal_t
     }
 
     explicit decimal_t(std::string num) {
-        double parsed;
+        UnderlyingType integerPart{}, fractionPart{};
+        char dotPlaceholder;
         std::istringstream ss(num);
-        ss >> parsed;
-        mNominator = decimal_t(parsed).mNominator;
+        ss >> integerPart >> dotPlaceholder >> fractionPart;
+        const size_t dotPos = num.find('.');
+        int fractionPartLen = static_cast<int>(num.size() - dotPos - 1);
+        fractionPart *= fractionPartLen >= PRECISION ? UnderlyingType{1} : Power10<UnderlyingType>(PRECISION - fractionPartLen);
+        mNominator = decimal_t{integerPart, fractionPart}.mNominator;
     }
 
     template<typename FloatingT,
              std::enable_if_t<std::is_floating_point<FloatingT>::value, bool> = true>
     explicit decimal_t(FloatingT num) {
-        int lastDigit = static_cast<int>(std::abs(num) * DENOMINATOR * 10) % 10;
-        int signFactor = num >=0 ? 1 : -1;
+        int lastDigit = static_cast<underlying_type>(std::abs(num) * DENOMINATOR * 10) % 10;
+        underlying_type signFactor = num >=0 ? 1 : -1;
         mNominator.value = static_cast<UnderlyingType>(num * DENOMINATOR) + (lastDigit >= 5 ? signFactor : 0);
     }
 
@@ -129,11 +149,17 @@ struct decimal_t
             nominator_t{mNominator.value * rhs.mNominator.value / DENOMINATOR + (fractionPart >= HALF_DENOMINATOR ? signFactor : 0)}
         };
     }
+    template<typename RhsUnderlyingType, int RhsPrecision>
+    decimal_t<underlying_type, PRECISION> operator*(const decimal_t<RhsUnderlyingType, RhsPrecision>& rhs) const {
+        auto res = *this;
+        res *= rhs;
+        return res;
+    }
     decimal_t<underlying_type, PRECISION> operator/(const decimal_t<underlying_type, PRECISION>& rhs) const {
         nominator_t res{mNominator.value};
         res.value *= Power10<underlying_type>(PRECISION+1);
         res.value /= rhs.nominator();
-        int signFactor = res.value >= 0 ? 1 : -1;
+        underlying_type signFactor = res.value >= 0 ? 1 : -1;
         int lastSignificantDigit = std::abs(res.value) % 10;
         res.value /= 10;
         res.value += lastSignificantDigit >= 5 ? signFactor : 0;
@@ -200,7 +226,7 @@ struct decimal_t
         mNominator.value *= Power10<underlying_type>(std::decay_t<decltype(rhs)>::PRECISION+1);
         mNominator.value /= rhs.nominator();
         int lastSignificantDigit = std::abs(mNominator.value) % 10;
-        int signFactor = mNominator.value >= 0 ? 1 : -1;
+        underlying_type signFactor = mNominator.value >= 0 ? 1 : -1;
         mNominator.value /= 10;
         mNominator.value += lastSignificantDigit >= 5 ? signFactor : 0;
         return *this;
@@ -241,8 +267,8 @@ struct ranged_decimal_t : public decimal_t<UnderlyingType, Precision>
     static constexpr int PRECISION = decimal_t<UnderlyingType, Precision>::PRECISION;
     static constexpr UnderlyingType MIN_VALUE = MinValue;
     static constexpr UnderlyingType MAX_VALUE = MaxValue;
-    static constexpr UnderlyingType NOMINATOR_MIN_VALUE = MIN_VALUE * decimal_t<UnderlyingType, Precision>::DENOMINATOR;
-    static constexpr UnderlyingType NOMINATOR_MAX_VALUE = MAX_VALUE * decimal_t<UnderlyingType, Precision>::DENOMINATOR;
+    static constexpr UnderlyingType NOMINATOR_MIN_VALUE = MIN_VALUE * base_type::DENOMINATOR;
+    static constexpr UnderlyingType NOMINATOR_MAX_VALUE = MAX_VALUE * base_type::DENOMINATOR;
 
     explicit ranged_decimal_t() : base_type() {
         this->mNominator.value = std::clamp(this->mNominator.value, NOMINATOR_MIN_VALUE, NOMINATOR_MAX_VALUE);
@@ -295,6 +321,13 @@ struct ranged_decimal_t : public decimal_t<UnderlyingType, Precision>
         const auto res = static_cast<const base_type&>(*this) * static_cast<const base_type&>(rhs);
         return ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>(typename base_type::nominator_t{res.nominator()});
     }
+    template<typename RhsUnderlyingType, int RhsPrecision>
+    ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>
+    operator*(const decimal_t<RhsUnderlyingType, RhsPrecision>& rhs) const {
+        auto res = static_cast<const base_type&>(*this);
+        res *= rhs;
+        return ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>(typename base_type::nominator_t{res.nominator()});
+    }
     ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>
     operator/(const ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>& rhs) const {
         const auto res = static_cast<const base_type&>(*this) / static_cast<const base_type&>(rhs);
@@ -325,7 +358,13 @@ struct ranged_decimal_t : public decimal_t<UnderlyingType, Precision>
         this->mNominator.value = std::clamp(this->mNominator.value, NOMINATOR_MIN_VALUE, NOMINATOR_MAX_VALUE);
         return *this;
     }
-
+    template<typename RhsUnderlyingType, int RhsDecimalPrecision>
+    ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>&
+    operator*=(const decimal_t<RhsUnderlyingType, RhsDecimalPrecision>& rhs) {
+        static_cast<base_type&>(*this) *= rhs;
+        this->mNominator.value = std::clamp(this->mNominator.value, NOMINATOR_MIN_VALUE, NOMINATOR_MAX_VALUE);
+        return *this;
+    }
     template<int RhsDecimalPrecision, UnderlyingType RhsMinValue, UnderlyingType RhsMaxValue>
     ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>&
     operator/=(const ranged_decimal_t<UnderlyingType, RhsDecimalPrecision, RhsMinValue, RhsMaxValue>& rhs) {

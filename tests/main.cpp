@@ -139,6 +139,8 @@ void RunRangedDecimalTests(TestSuite& testSuite)
 
     EXECUTE_TEST(testSuite, test_narrowing_above_max_values);
     EXECUTE_TEST(testSuite, test_narrowing_below_min_values);
+
+    EXECUTE_TEST(testSuite, test_multiplying_ranged_decimal_by_decimal);
 }
 
 int main()

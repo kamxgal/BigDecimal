@@ -458,10 +458,26 @@ bool test_multiplying_by_decimal_with_different_precision()
     ASSERT_EQ(second.to_float(), 0.0001f);
     ASSERT_EQ(second.to_double(), 0.0001);
 
-    first *= second;
-    ASSERT_EQ(first.to_string(), "0.00000002");
-    ASSERT_EQ(first.to_float(), 0.00000002f);
-    ASSERT_EQ(first.to_double(), 0.00000002);
+    const auto first_x_second = first * second;
+    ASSERT_EQ(first_x_second.to_string(), "0.00000002");
+    ASSERT_EQ(first_x_second.to_float(), 0.00000002f);
+    ASSERT_EQ(first_x_second.to_double(), 0.00000002);
+
+    const auto second_x_first = second * first;
+    ASSERT_EQ(second_x_first.to_string(), "0.0000");
+    ASSERT_EQ(second_x_first.to_float(), 0.0f);
+    ASSERT_EQ(second_x_first.to_double(), 0.0);
+
+    auto temp1 = first; temp1 *= second;
+    ASSERT_EQ(temp1.to_string(), "0.00000002");
+    ASSERT_EQ(temp1.to_float(), 0.00000002f);
+    ASSERT_EQ(temp1.to_double(), 0.00000002);
+
+    auto temp2 = second; temp2 *= first;
+    ASSERT_EQ(temp2.to_string(), "0.0000");
+    ASSERT_EQ(temp2.to_float(), 0.0f);
+    ASSERT_EQ(temp2.to_double(), 0.0);
+
     return true;
 }
 

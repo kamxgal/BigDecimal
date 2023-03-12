@@ -42,6 +42,7 @@
 using namespace std;
 using ranged_decimal2d_t = strict::ranged_decimal_t<int64_t, 2, -1000, 1000>;
 using ranged_decimal3d_t = strict::ranged_decimal_t<int64_t, 3, -1000, 1000>;
+using ranged_decimal4d_t = strict::ranged_decimal_t<int64_t, 4, -1000, 1000>;
 
 bool test_constructing_ranged_decimal_from_double_and_parsing_to_string()
 {
@@ -915,6 +916,37 @@ bool test_narrowing_below_min_values()
 
     const auto number7 = ranged_decimal3d_t{100} * ranged_decimal3d_t{-100};
     ASSERT_EQ(number7.nominator(), ranged_decimal3d_t::NOMINATOR_MIN_VALUE);
+
+    return true;
+}
+
+bool test_multiplying_ranged_decimal_by_decimal()
+{
+    auto first = ranged_decimal4d_t{23, 5000};
+    auto second = strict::decimal_t<int64_t, 2>{2, 1};
+
+    auto first_x_second = first * second;
+    auto second_x_first = second * first;
+
+    ASSERT_EQ(first_x_second.to_string(), "47.2350");
+    ASSERT_EQ(first_x_second.to_double(), 47.235);
+    ASSERT_EQ(first_x_second.to_float(), 47.235f);
+
+    ASSERT_EQ(second_x_first.to_string(), "47.24");
+    ASSERT_EQ(second_x_first.to_double(), 47.24);
+    ASSERT_EQ(second_x_first.to_float(), 47.24f);
+
+    auto temp1 = first;
+    temp1 *= second;
+    ASSERT_EQ(temp1.to_string(), "47.2350");
+    ASSERT_EQ(temp1.to_double(), 47.235);
+    ASSERT_EQ(temp1.to_float(), 47.235f);
+
+    auto temp2 = second;
+    temp2 *= first;
+    ASSERT_EQ(temp2.to_string(), "47.24");
+    ASSERT_EQ(temp2.to_double(), 47.24);
+    ASSERT_EQ(temp2.to_float(), 47.24f);
 
     return true;
 }
