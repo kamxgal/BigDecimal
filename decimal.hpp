@@ -93,7 +93,7 @@ struct decimal_t
         char dotPlaceholder;
         std::istringstream ss(num);
         ss >> integerPart >> dotPlaceholder >> fractionPart;
-        const size_t dotPos = num.find('.');
+        const ::size_t dotPos = num.find('.');
         int fractionPartLen = static_cast<int>(num.size() - dotPos - 1);
         fractionPart *= fractionPartLen >= PRECISION ? UnderlyingType{1} : Power10<UnderlyingType>(PRECISION - fractionPartLen);
         mNominator = decimal_t{integerPart, fractionPart}.mNominator;
@@ -129,17 +129,21 @@ struct decimal_t
     UnderlyingType integer_part() const { return mNominator.value / DENOMINATOR; }
     UnderlyingType fraction_part() const { return std::abs(mNominator.value) % DENOMINATOR; }
 
-    constexpr bool operator<(const decimal_t<underlying_type, PRECISION>& other) { return mNominator < other.mNominator; }
-    constexpr bool operator<=(const decimal_t<underlying_type, PRECISION>& other) { return mNominator <= other.mNominator; }
-    constexpr bool operator==(const decimal_t<underlying_type, PRECISION>& other) { return mNominator == other.mNominator; }
-    constexpr bool operator>=(const decimal_t<underlying_type, PRECISION>& other) { return mNominator >= other.mNominator; }
-    constexpr bool operator>(const decimal_t<underlying_type, PRECISION>& other) { return mNominator > other.mNominator; }
+    constexpr bool operator<(const decimal_t<underlying_type, PRECISION>& other) const { return mNominator.value < other.mNominator.value; }
+    constexpr bool operator<=(const decimal_t<underlying_type, PRECISION>& other) const { return mNominator.value <= other.mNominator.value; }
+    constexpr bool operator==(const decimal_t<underlying_type, PRECISION>& other) const { return mNominator.value == other.mNominator.value; }
+    constexpr bool operator!=(const decimal_t<underlying_type, PRECISION>& other) const { return mNominator.value != other.mNominator.value; }
+    constexpr bool operator>=(const decimal_t<underlying_type, PRECISION>& other) const { return mNominator.value >= other.mNominator.value; }
+    constexpr bool operator>(const decimal_t<underlying_type, PRECISION>& other) const { return mNominator.value > other.mNominator.value; }
 
     decimal_t<underlying_type, PRECISION> operator+(const decimal_t<underlying_type, PRECISION>& rhs) const {
         return decimal_t<UnderlyingType, PRECISION>{nominator_t{mNominator.value + rhs.mNominator.value}};
     }
     decimal_t<underlying_type, PRECISION> operator-(const decimal_t<underlying_type, PRECISION>& rhs) const {
         return decimal_t<UnderlyingType, PRECISION>{nominator_t{mNominator.value - rhs.mNominator.value}};
+    }
+    decimal_t<underlying_type, PRECISION> operator-() const {
+        return decimal_t<UnderlyingType, PRECISION>{nominator_t{-mNominator.value}};
     }
     decimal_t<underlying_type, PRECISION> operator*(const decimal_t<underlying_type, PRECISION>& rhs) const {
         underlying_type res = mNominator.value * rhs.mNominator.value;
@@ -165,6 +169,14 @@ struct decimal_t
         res.value += lastSignificantDigit >= 5 ? signFactor : 0;
         return decimal_t<UnderlyingType, PRECISION>{res};
     }
+    template<typename RhsUnderlyingType, int RhsPrecision>
+    decimal_t<underlying_type, PRECISION> operator/(const decimal_t<RhsUnderlyingType, RhsPrecision>& rhs) const {
+        return decimal_t<underlying_type, PRECISION>{
+            typename decimal_t<underlying_type, PRECISION>::nominator_t{mNominator.value *
+                        static_cast<underlying_type>(std::decay_t<decltype(rhs)>::DENOMINATOR) /
+                        static_cast<underlying_type>(rhs.nominator())}
+        };
+    }
     decimal_t<underlying_type, PRECISION>& operator+=(const decimal_t<underlying_type, PRECISION>& rhs) {
         mNominator.value += rhs.mNominator.value;
         return *this;
@@ -181,42 +193,44 @@ struct decimal_t
         return *this;
     }
 
-    template<int RhsDecimalPrecision>
-    decimal_t<underlying_type, PRECISION>& operator*=(const decimal_t<underlying_type, RhsDecimalPrecision>& rhs) {
-        const underlying_type integerPart = this->integer_part();
-        underlying_type fractionPart = this->fraction_part();
-        const underlying_type rhsIntegerPart = rhs.integer_part();
-        underlying_type rhsFractionPart = rhs.fraction_part();
+    template<typename RhsUnderlyingType, int RhsDecimalPrecision>
+    decimal_t<underlying_type, PRECISION>& operator*=(const decimal_t<RhsUnderlyingType, RhsDecimalPrecision>& rhs) {
+        using OperatingType = std::conditional_t<sizeof(underlying_type) >= sizeof(RhsUnderlyingType), underlying_type, RhsUnderlyingType>;
+        const OperatingType integerPart = static_cast<OperatingType>(this->integer_part());
+        OperatingType fractionPart = static_cast<OperatingType>(this->fraction_part());
+        const OperatingType rhsIntegerPart = static_cast<OperatingType>(rhs.integer_part());
+        OperatingType rhsFractionPart = static_cast<OperatingType>(rhs.fraction_part());
 
         // first = least common denominator; second=doubled least common denominator
-        const auto denominatorInfo = []() -> std::pair<underlying_type, underlying_type> {
-            if (DENOMINATOR < std::decay_t<decltype(rhs)>::DENOMINATOR) {
-                return {std::decay_t<decltype(rhs)>::DENOMINATOR, std::decay_t<decltype(rhs)>::DOUBLED_DENOMINATOR};
+        const auto denominatorInfo = []() constexpr -> std::pair<OperatingType, OperatingType> {
+            if constexpr (static_cast<OperatingType>(DENOMINATOR) < static_cast<OperatingType>(std::decay_t<decltype(rhs)>::DENOMINATOR)) {
+                return {static_cast<OperatingType>(std::decay_t<decltype(rhs)>::DENOMINATOR),
+                        static_cast<OperatingType>(std::decay_t<decltype(rhs)>::DOUBLED_DENOMINATOR)};
             } else {
-                return {DENOMINATOR, DOUBLED_DENOMINATOR};
+                return {static_cast<OperatingType>(DENOMINATOR), static_cast<OperatingType>(DOUBLED_DENOMINATOR)};
             }
         }();
 
         // setting values of fractionPart and rhsFractionPart as having common denominator
         fractionPart *= denominatorInfo.first / DENOMINATOR;
-        rhsFractionPart *= denominatorInfo.first / std::decay_t<decltype(rhs)>::DENOMINATOR;
+        rhsFractionPart *= denominatorInfo.first / static_cast<underlying_type>(std::decay_t<decltype(rhs)>::DENOMINATOR);
 
-        underlying_type resultInteger = std::abs(integerPart * rhsIntegerPart);
+        OperatingType resultInteger = std::abs(integerPart * rhsIntegerPart);
         underlying_type signFactor = integerPart * rhsIntegerPart >= 0 ? 1 : -1;
         // commonFraction has denominator equal to commonDenominator
-        underlying_type commonFraction = std::abs(integerPart) * rhsFractionPart + fractionPart * std::abs(rhsIntegerPart);
+        OperatingType commonFraction = std::abs(integerPart) * rhsFractionPart + fractionPart * std::abs(rhsIntegerPart);
         resultInteger += commonFraction / denominatorInfo.first;
         commonFraction %= denominatorInfo.first;
         // from now on denominator of commonFraction equals commonDenominator*commonDenominator
         commonFraction *= denominatorInfo.first;
         commonFraction += fractionPart * rhsFractionPart;
         // from now on commonFraction is treated as if its denominator is equal Power10<underlying_type>(PRECISION + 1);
-        commonFraction /= denominatorInfo.second / Power10<underlying_type>(PRECISION + 1);
+        commonFraction /= denominatorInfo.second / Power10<OperatingType>(PRECISION + 1);
         const int lastSignificantDigit = commonFraction % 10;
         commonFraction /= 10;
         commonFraction += lastSignificantDigit >= 5 ? 1 : 0;
 
-        mNominator.value = resultInteger * DENOMINATOR + commonFraction;
+        mNominator.value = static_cast<underlying_type>(resultInteger * DENOMINATOR + commonFraction);
         mNominator.value *= signFactor;
         return *this;
     }
@@ -230,16 +244,6 @@ struct decimal_t
         mNominator.value /= 10;
         mNominator.value += lastSignificantDigit >= 5 ? signFactor : 0;
         return *this;
-    }
-
-    friend bool operator==(const decimal_t<underlying_type, PRECISION>& lhs,
-                           const decimal_t<underlying_type, PRECISION>& rhs) {
-        return lhs.mNominator.value == rhs.mNominator.value;
-    }
-
-    friend bool operator!=(const decimal_t<underlying_type, PRECISION>& lhs,
-                           const decimal_t<underlying_type, PRECISION>& rhs) {
-        return lhs.mNominator.value != rhs.mNominator.value;
     }
 
     friend std::ostream& operator<<(std::ostream& out, const decimal_t<underlying_type, PRECISION>& decimal) {
@@ -265,8 +269,12 @@ struct ranged_decimal_t : public decimal_t<UnderlyingType, Precision>
     using base_type = decimal_t<UnderlyingType, Precision>;
     using this_type = ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>;
     static constexpr int PRECISION = decimal_t<UnderlyingType, Precision>::PRECISION;
-    static constexpr UnderlyingType MIN_VALUE = MinValue;
-    static constexpr UnderlyingType MAX_VALUE = MaxValue;
+    static constexpr UnderlyingType MIN_VALUE = std::clamp<UnderlyingType>(MinValue,
+        std::numeric_limits<UnderlyingType>::min() / base_type::DENOMINATOR,
+        std::numeric_limits<UnderlyingType>::max() / base_type::DENOMINATOR);
+    static constexpr UnderlyingType MAX_VALUE = std::clamp<UnderlyingType>(MaxValue,
+        std::numeric_limits<UnderlyingType>::min() / base_type::DENOMINATOR,
+        std::numeric_limits<UnderlyingType>::max() / base_type::DENOMINATOR);
     static constexpr UnderlyingType NOMINATOR_MIN_VALUE = MIN_VALUE * base_type::DENOMINATOR;
     static constexpr UnderlyingType NOMINATOR_MAX_VALUE = MAX_VALUE * base_type::DENOMINATOR;
 
@@ -300,11 +308,11 @@ struct ranged_decimal_t : public decimal_t<UnderlyingType, Precision>
         this->mNominator.value = std::clamp(this->mNominator.value, NOMINATOR_MIN_VALUE, NOMINATOR_MAX_VALUE);
     }
 
-    constexpr bool operator<(const base_type& other) { return this->mNominator < other.mNominator; }
-    constexpr bool operator<=(const base_type& other) { return this->mNominator <= other.mNominator; }
-    constexpr bool operator==(const base_type& other) { return this->mNominator == other.mNominator; }
-    constexpr bool operator>=(const base_type& other) { return this->mNominator >= other.mNominator; }
-    constexpr bool operator>(const base_type& other) { return this->mNominator > other.mNominator; }
+    constexpr bool operator<(const base_type& other) const { return this->mNominator.value < other.nominator(); }
+    constexpr bool operator<=(const base_type& other) const { return this->mNominator.value <= other.nominator(); }
+    constexpr bool operator==(const base_type& other) const { return this->mNominator.value == other.nominator(); }
+    constexpr bool operator>=(const base_type& other) const { return this->mNominator.value >= other.nominator(); }
+    constexpr bool operator>(const base_type& other) const { return this->mNominator.value > other.nominator(); }
 
     ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>
     operator+(const ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>& rhs) const {
@@ -315,6 +323,11 @@ struct ranged_decimal_t : public decimal_t<UnderlyingType, Precision>
     operator-(const ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>& rhs) const {
         const auto res = static_cast<const base_type&>(*this) - static_cast<const base_type&>(rhs);
         return ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>(typename base_type::nominator_t{res.nominator()});
+    }
+    ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>
+    operator-() const {
+        return ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>(
+                    typename base_type::nominator_t{-static_cast<const base_type&>(*this).nominator()});
     }
     ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>
     operator*(const ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>& rhs) const {
@@ -331,6 +344,13 @@ struct ranged_decimal_t : public decimal_t<UnderlyingType, Precision>
     ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>
     operator/(const ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>& rhs) const {
         const auto res = static_cast<const base_type&>(*this) / static_cast<const base_type&>(rhs);
+        return ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>(typename base_type::nominator_t{res.nominator()});
+    }
+    template<typename RhsUnderlyingType, int RhsPrecision>
+    ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>
+    operator/(const decimal_t<RhsUnderlyingType, RhsPrecision>& rhs) const {
+        auto res = static_cast<const base_type&>(*this);
+        res /= rhs;
         return ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>(typename base_type::nominator_t{res.nominator()});
     }
     ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>&
@@ -373,16 +393,6 @@ struct ranged_decimal_t : public decimal_t<UnderlyingType, Precision>
         return *this;
     }
 
-    friend bool operator==(const ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>& lhs,
-                           const ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>& rhs) {
-        return lhs.mNominator.value == rhs.mNominator.value;
-    }
-
-    friend bool operator!=(const ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>& lhs,
-                           const ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>& rhs) {
-        return lhs.mNominator.value != rhs.mNominator.value;
-    }
-
     friend std::ostream& operator<<(std::ostream& out, const ranged_decimal_t<UnderlyingType, Precision, MinValue, MaxValue>& decimal) {
         out << decimal.to_string();
         return out;
@@ -402,12 +412,30 @@ decimal_cast(const decimal_t<OldUnderlyingType, OldPrecision>& oldDecimal) noexc
         });
 }
 
-template<typename NewUnderlyingType, int Precision, typename OldUnderlyingType, int OldPrecision>
-inline typename std::enable_if<Precision == OldPrecision, decimal_t<NewUnderlyingType, Precision>>::type
+template<typename NewUnderlyingType, int NewPrecision, typename OldUnderlyingType, int OldPrecision>
+inline typename std::enable_if<NewPrecision == OldPrecision, decimal_t<NewUnderlyingType, NewPrecision>>::type
 decimal_cast(const decimal_t<OldUnderlyingType, OldPrecision>& oldDecimal) noexcept {
-    return decimal_t<NewUnderlyingType, Precision>(typename decimal_t<NewUnderlyingType, Precision>::nominator_t{
+    return decimal_t<NewUnderlyingType, NewPrecision>(typename decimal_t<NewUnderlyingType, NewPrecision>::nominator_t{
             static_cast<NewUnderlyingType>(oldDecimal.nominator())
         });
 }
+
+template<typename ResDecimalType, typename OldUnderlyingType, int OldPrecision>
+inline ResDecimalType
+decimal_cast(const decimal_t<OldUnderlyingType, OldPrecision>& oldDecimal) noexcept {
+    return decimal_cast<typename ResDecimalType::underlying_type, ResDecimalType::PRECISION,
+            OldUnderlyingType, OldPrecision>(oldDecimal);
+}
+
+template<typename UnderlyingType, int Precision>
+const decimal_t<UnderlyingType, Precision>&
+min(const decimal_t<UnderlyingType, Precision>& first, const decimal_t<UnderlyingType, Precision>& second)
+{
+    return first < second ? first : second;
+}
+
+using integer_t = decimal_t<int, 0>;
+using size_t = decimal_t<size_t, 0>;
+using float32_3d_t = decimal_t<int32_t, 3>;
 
 }  // namespace strict
