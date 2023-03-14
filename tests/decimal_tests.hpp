@@ -60,6 +60,7 @@ bool test_dividing_by_decimal();
 bool test_getting_integer_and_fraction_part();
 
 bool test_multiplying_by_decimal_with_different_precision();
+bool test_dividing_decimals_with_different_precision();
 bool test_dividing_by_decimal_with_different_precision();
 
 bool test_creation_of_negative_numbers();
@@ -80,3 +81,9 @@ bool test_casting_precision_up_negative_decimals();
 bool test_casting_to_different_underlying_type();
 bool test_casting_to_different_precision();
 bool test_comparing_decimals();
+
+bool test_mutiplying_small_precision_by_big_precision_decimal();
+
+bool test_handling_divide_positive_infinity();
+bool test_handling_divide_negative_infinity();
+bool test_handling_divide_nan();

@@ -89,3 +89,7 @@ bool test_narrowing_above_max_values();
 bool test_narrowing_below_min_values();
 
 bool test_multiplying_ranged_decimal_by_decimal();
+
+bool test_handling_divide_ranged_decimal_to_positive_infinity();
+bool test_handling_divide_ranged_decimal_to_negative_infinity();
+bool test_handling_divide_ranged_decimal_to_nan();

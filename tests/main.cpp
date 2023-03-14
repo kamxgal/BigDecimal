@@ -63,6 +63,7 @@ void RunDecimalTests(TestSuite& testSuite)
     EXECUTE_TEST(testSuite, test_getting_integer_and_fraction_part);
 
     EXECUTE_TEST(testSuite, test_multiplying_by_decimal_with_different_precision);
+    EXECUTE_TEST(testSuite, test_dividing_decimals_with_different_precision);
     EXECUTE_TEST(testSuite, test_dividing_by_decimal_with_different_precision);
 
     EXECUTE_TEST(testSuite, test_creation_of_negative_numbers);
@@ -87,6 +88,12 @@ void RunDecimalTests(TestSuite& testSuite)
     EXECUTE_TEST(testSuite, test_casting_to_different_precision);
 
     EXECUTE_TEST(testSuite, test_comparing_decimals);
+
+    EXECUTE_TEST(testSuite, test_mutiplying_small_precision_by_big_precision_decimal);
+
+    EXECUTE_TEST(testSuite, test_handling_divide_positive_infinity);
+    EXECUTE_TEST(testSuite, test_handling_divide_negative_infinity);
+    EXECUTE_TEST(testSuite, test_handling_divide_nan);
 }
 
 void RunRangedDecimalTests(TestSuite& testSuite)
@@ -141,6 +148,10 @@ void RunRangedDecimalTests(TestSuite& testSuite)
     EXECUTE_TEST(testSuite, test_narrowing_below_min_values);
 
     EXECUTE_TEST(testSuite, test_multiplying_ranged_decimal_by_decimal);
+
+    EXECUTE_TEST(testSuite, test_handling_divide_ranged_decimal_to_positive_infinity);
+    EXECUTE_TEST(testSuite, test_handling_divide_ranged_decimal_to_negative_infinity);
+    EXECUTE_TEST(testSuite, test_handling_divide_ranged_decimal_to_nan);
 }
 
 int main()

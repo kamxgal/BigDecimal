@@ -7,6 +7,7 @@
 
 #define ASSERT_EQ(a, b) if ((a) != (b)) { std::cout << "Line " << __LINE__ << ": ASSERT_EQ failed: " << a << " != " << b << std::endl; return false; }
 #define ASSERT_NEQ(a, b) if ((a) == (b)) { std::cout << "Line " << __LINE__ << ": ASSERT_NEQ failed: " << a << " == " << b << std::endl; return false; }
+#define ASSERT_TRUE(cond) if (!(cond)) { std::cout << "Line " << __LINE__ << ": ASSERT_TRUE failed: " << #cond << " == false" << std::endl; return false; }
 
 struct TestSuite
 {
@@ -15,7 +16,7 @@ struct TestSuite
 
     void print_failed() {
         for (const auto& name : failed_tests) {
-            std::cerr << "[FAILED] " << name << std::endl;
+            std::cerr << "[     FAILED ] " << name << std::endl;
         }
     }
 
@@ -33,10 +34,10 @@ private:
 };
 
 #define EXECUTE_TEST(testSuite, testName) \
-    std::cout << "[BEGIN]\t" << testSuite.get_name() << "." << #testName << std::endl; \
+    std::cout << "[ BEGIN      ]\t" << testSuite.get_name() << "." << #testName << std::endl; \
     if (testName()) { \
-        std::cout << "[SUCCESS]\t" << testSuite.get_name() << "." << #testName << std::endl; \
+        std::cout << "[    SUCCESS ]\t" << testSuite.get_name() << "." << #testName << std::endl; \
     } else { \
-        std::cout << "[FAILED]\t" << testSuite.get_name() << "." << #testName << std::endl; \
+        std::cout << "[     FAILED ]\t" << testSuite.get_name() << "." << #testName << std::endl; \
         testSuite.add_failed_test(std::string(#testName)); \
     }

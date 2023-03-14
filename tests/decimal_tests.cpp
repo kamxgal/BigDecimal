@@ -477,7 +477,22 @@ bool test_multiplying_by_decimal_with_different_precision()
     ASSERT_EQ(temp2.to_string(), "0.0000");
     ASSERT_EQ(temp2.to_float(), 0.0f);
     ASSERT_EQ(temp2.to_double(), 0.0);
+    return true;
+}
 
+bool test_dividing_decimals_with_different_precision()
+{
+    decimal2d_t number0 = decimal2d_t{9.94};
+    auto res0 = number0 / decimal3d_t{10};  // 9.94 / 10 = 0.994 -> rounding down so result is 0.99
+    ASSERT_EQ(res0.to_string(), "0.99");
+    ASSERT_EQ(res0.to_float(), 0.99f);
+    ASSERT_EQ(res0.to_double(), 0.99);
+
+    decimal2d_t number1 = decimal2d_t{9.96};
+    auto res1 = number1 / decimal3d_t{10};  // 9.96 / 10 = 0.996 -> rounding up so result is 1.00
+    ASSERT_EQ(res1.to_string(), "1.00");
+    ASSERT_EQ(res1.to_float(), 1.0f);
+    ASSERT_EQ(res1.to_double(), 1.0);
     return true;
 }
 
@@ -874,5 +889,69 @@ bool test_comparing_decimals()
     ASSERT_EQ(number2, number3);
 
     ASSERT_NEQ(number0, number4);
+    return true;
+}
+
+bool test_mutiplying_small_precision_by_big_precision_decimal()
+{
+    const auto number2d = strict::decimal_t<int64_t, 2>{12345, 67};
+    const auto number5d = strict::decimal_t<int32_t, 5>{0, 12345};
+
+    const auto expected1 = strict::decimal_t<int64_t, 2>{1524, 07};
+    const auto res1 = number2d * number5d;
+
+    const auto expected2 = strict::decimal_t<int32_t, 5>{1524, 7296};
+    const auto res2 = number5d * number2d;
+
+    ASSERT_EQ(expected1, res1);
+    ASSERT_EQ(expected2, res2);
+    return true;
+}
+
+bool test_handling_divide_positive_infinity()
+{
+    auto number2d = strict::decimal_t<int64_t, 2>{12345, 67};
+    const auto res = number2d / strict::decimal_t<int64_t, 2>{0};
+
+    ASSERT_EQ(res.to_string(), "inf");
+    ASSERT_TRUE(std::isinf(res.to_float()));
+    ASSERT_TRUE(std::isinf(res.to_double()));
+
+    number2d /= strict::decimal_t<int64_t, 2>{0};
+    ASSERT_EQ(number2d.to_string(), "inf");
+    ASSERT_TRUE(std::isinf(number2d.to_float()));
+    ASSERT_TRUE(std::isinf(number2d.to_double()));
+    return true;
+}
+
+bool test_handling_divide_negative_infinity()
+{
+    auto number2d = strict::decimal_t<int64_t, 2>{-12345, 67};
+    const auto res = number2d / strict::decimal_t<int64_t, 2>{0};
+
+    ASSERT_EQ(res.to_string(), "-inf");
+    ASSERT_TRUE(std::isinf(res.to_float()));
+    ASSERT_TRUE(std::isinf(res.to_double()));
+
+    number2d /= strict::decimal_t<int64_t, 2>{0};
+    ASSERT_EQ(number2d.to_string(), "-inf");
+    ASSERT_TRUE(std::isinf(number2d.to_float()));
+    ASSERT_TRUE(std::isinf(number2d.to_double()));
+    return true;
+}
+
+bool test_handling_divide_nan()
+{
+    auto number2d = strict::decimal_t<int64_t, 2>{0};
+    const auto res = number2d / strict::decimal_t<int64_t, 2>{0};
+
+    ASSERT_EQ(res.to_string(), "nan");
+    ASSERT_TRUE(std::isnan(res.to_float()));
+    ASSERT_TRUE(std::isnan(res.to_double()));
+
+    number2d /= strict::decimal_t<int64_t, 2>{0};
+    ASSERT_EQ(number2d.to_string(), "nan");
+    ASSERT_TRUE(std::isnan(number2d.to_float()));
+    ASSERT_TRUE(std::isnan(number2d.to_double()));
     return true;
 }

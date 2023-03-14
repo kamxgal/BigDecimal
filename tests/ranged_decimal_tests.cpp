@@ -947,6 +947,66 @@ bool test_multiplying_ranged_decimal_by_decimal()
     ASSERT_EQ(temp2.to_string(), "47.24");
     ASSERT_EQ(temp2.to_double(), 47.24);
     ASSERT_EQ(temp2.to_float(), 47.24f);
+    return true;
+}
 
+bool test_handling_divide_ranged_decimal_to_positive_infinity()
+{
+    auto number = ranged_decimal4d_t{100};
+    const auto res = number / ranged_decimal4d_t{0};
+    number /= ranged_decimal4d_t{0};
+
+    ASSERT_EQ(res.to_string(), "1000.0000");
+    ASSERT_EQ(res.to_float(), 1000.0f);
+    ASSERT_EQ(res.to_double(), 1000.0);
+
+    ASSERT_EQ(number.to_string(), "1000.0000");
+    ASSERT_EQ(number.to_float(), 1000.0f);
+    ASSERT_EQ(number.to_double(), 1000.0);
+
+    number = ranged_decimal4d_t{100};;
+    ASSERT_EQ(number.to_string(), "100.0000");
+    ASSERT_EQ(number.to_string(), "100.0000");
+    ASSERT_EQ(number.to_string(), "100.0000");
+    return true;
+}
+
+bool test_handling_divide_ranged_decimal_to_negative_infinity()
+{
+    auto number = ranged_decimal4d_t{-100};
+    const auto res = number / ranged_decimal4d_t{0};
+    number /= ranged_decimal4d_t{0};
+
+    ASSERT_EQ(res.to_string(), "-1000.0000");
+    ASSERT_EQ(res.to_float(), -1000.0f);
+    ASSERT_EQ(res.to_double(), -1000.0);
+
+    ASSERT_EQ(number.to_string(), "-1000.0000");
+    ASSERT_EQ(number.to_float(), -1000.0f);
+    ASSERT_EQ(number.to_double(), -1000.0);
+    return true;
+}
+
+bool test_handling_divide_ranged_decimal_to_nan()
+{
+    auto number = ranged_decimal4d_t{0};
+    const auto res = number / strict::decimal_t<int64_t, 2>{0};
+
+    ASSERT_EQ(res.to_string(), "nan");
+    ASSERT_TRUE(std::isnan(res.to_float()));
+    ASSERT_TRUE(std::isnan(res.to_double()));
+
+    number /= strict::ranged_decimal_t<int64_t, 2, -1, 1>{0};
+    ASSERT_EQ(number.to_string(), "nan");
+    ASSERT_TRUE(std::isnan(number.to_float()));
+    ASSERT_TRUE(std::isnan(number.to_double()));
+
+    number = ranged_decimal4d_t{0};
+    ASSERT_EQ(number.to_string(), "0.0000");
+
+    number /= strict::decimal_t<int64_t, 2>{0};
+    ASSERT_EQ(number.to_string(), "nan");
+    ASSERT_TRUE(std::isnan(number.to_float()));
+    ASSERT_TRUE(std::isnan(number.to_double()));
     return true;
 }
