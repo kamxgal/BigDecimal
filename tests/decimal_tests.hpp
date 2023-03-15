@@ -87,3 +87,13 @@ bool test_mutiplying_small_precision_by_big_precision_decimal();
 bool test_handling_divide_positive_infinity();
 bool test_handling_divide_negative_infinity();
 bool test_handling_divide_nan();
+
+bool test_multiplying_floats_by_strict_integers();
+bool test_multiplying_strict_integers();
+bool test_multiplying_integer_by_float();
+bool test_direct_multiplying_integer_by_float();
+
+bool test_divide_floats_by_strict_integers();
+bool test_divide_strict_integers();
+bool test_divide_integer_by_float();
+bool test_direct_divide_integer_by_float();

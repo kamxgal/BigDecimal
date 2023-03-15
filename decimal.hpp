@@ -147,12 +147,15 @@ struct decimal_t
         return decimal_t<UnderlyingType, PRECISION>{nominator_t{-mNominator.value}};
     }
     decimal_t<underlying_type, PRECISION> operator*(const decimal_t<underlying_type, PRECISION>& rhs) const {
+        using this_type = decimal_t<underlying_type, PRECISION>;
         underlying_type res = mNominator.value * rhs.mNominator.value;
-        underlying_type fractionPart = std::abs(res) % DENOMINATOR;
-        underlying_type signFactor = res >= 0 ? 1 : -1;
-        return decimal_t<UnderlyingType, PRECISION>{
-            nominator_t{mNominator.value * rhs.mNominator.value / DENOMINATOR + (fractionPart >= HALF_DENOMINATOR ? signFactor : 0)}
-        };
+        if constexpr (PRECISION == 0) {
+            return this_type{nominator_t{res}};
+        } else {
+            underlying_type fractionPart = std::abs(res) % DENOMINATOR;
+            underlying_type signFactor = res >= 0 ? 1 : -1;
+            return this_type{nominator_t{res / DENOMINATOR + (fractionPart >= HALF_DENOMINATOR ? signFactor : 0)}};
+        }
     }
     template<typename RhsUnderlyingType, int RhsPrecision>
     decimal_t<underlying_type, PRECISION> operator*(const decimal_t<RhsUnderlyingType, RhsPrecision>& rhs) const {
@@ -176,9 +179,13 @@ struct decimal_t
     }
     decimal_t<underlying_type, PRECISION>& operator*=(const decimal_t<underlying_type, PRECISION>& rhs) {
         underlying_type res = mNominator.value * rhs.mNominator.value;
-        underlying_type fractionPart = std::abs(res) % DENOMINATOR;
-        underlying_type signFactor = res >= 0 ? 1 : -1;
-        mNominator.value = mNominator.value * rhs.mNominator.value / DENOMINATOR + (fractionPart >= HALF_DENOMINATOR ? signFactor : 0);
+        if constexpr (PRECISION == 0) {
+            mNominator.value = mNominator.value * rhs.mNominator.value;
+        } else {
+            underlying_type fractionPart = std::abs(res) % DENOMINATOR;
+            underlying_type signFactor = res >= 0 ? 1 : -1;
+            mNominator.value = mNominator.value * rhs.mNominator.value / DENOMINATOR + (fractionPart >= HALF_DENOMINATOR ? signFactor : 0);
+        }
         return *this;
     }
 
@@ -261,18 +268,21 @@ struct decimal_t
         default: return static_cast<double>(mNominator.value) / DENOMINATOR;
         }
     }
+
     std::string to_string() const {
-        switch (mNominator.value)
-        {
-        case NAN_VALUE: return std::string("nan");
-        case INFINITY_PLUS: return std::string("inf");
-        case INFINITY_MINUS: return std::string("-inf");
-        default:
-        {
-            std::stringstream ss;
-            ss << integer_part() << '.' << std::setfill('0') << std::setw(PRECISION) << fraction_part();
-            return ss.str();
-        }
+        if constexpr (PRECISION == 0) {
+            return std::to_string(mNominator.value);
+        } else {
+            switch (mNominator.value)
+            {
+            case NAN_VALUE: return std::string("nan");
+            case INFINITY_PLUS: return std::string("inf");
+            case INFINITY_MINUS: return std::string("-inf");
+            default:
+                std::stringstream ss;
+                ss << integer_part() << '.' << std::setfill('0') << std::setw(PRECISION) << fraction_part();
+                return ss.str();
+            }
         }
     }
 

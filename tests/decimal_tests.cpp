@@ -955,3 +955,153 @@ bool test_handling_divide_nan()
     ASSERT_TRUE(std::isnan(number2d.to_double()));
     return true;
 }
+
+bool test_multiplying_floats_by_strict_integers()
+{
+    auto f = strict::float32_3d_t{10.123};
+    const auto i = strict::integer_t{100};
+
+    const auto res = f * i;
+    f *= i;
+
+    ASSERT_EQ(res.to_string(), "1012.300");
+    ASSERT_EQ(res.to_float(), 1012.3f);
+    ASSERT_EQ(res.to_double(), 1012.3);
+
+    ASSERT_EQ(f.to_string(), "1012.300");
+    ASSERT_EQ(f.to_float(), 1012.3f);
+    ASSERT_EQ(f.to_double(), 1012.3);
+
+    return true;
+}
+
+bool test_multiplying_strict_integers()
+{
+    auto first = strict::integer_t{51};
+    const auto second = strict::integer_t{10};
+
+    const auto res = first * second;
+    first *= second;
+
+    ASSERT_EQ(res.to_string(), "510");
+    ASSERT_EQ(res.to_float(), 510.0f);
+    ASSERT_EQ(res.to_double(), 510.0);
+
+    ASSERT_EQ(first.to_string(), "510");
+    ASSERT_EQ(first.to_float(), 510.0f);
+    ASSERT_EQ(first.to_double(), 510.0);
+
+    return true;
+}
+
+bool test_multiplying_integer_by_float()
+{
+    auto integer = strict::integer_t{51};
+    const auto floatFirst = strict::float32_3d_t{10};
+    const auto floatSecond = strict::float32_3d_t{10, 567};
+
+    const auto resFirst = integer * floatFirst;
+    const auto resSecond = integer * floatSecond;
+
+    ASSERT_EQ(resFirst.to_string(), "510");
+    ASSERT_EQ(resFirst.to_float(), 510.0f);
+    ASSERT_EQ(resFirst.to_double(), 510.0);
+
+    ASSERT_EQ(resSecond.to_string(), "539");  // exactly it is 538.917 rounded up to 539
+    ASSERT_EQ(resSecond.to_float(), 539.0f);
+    ASSERT_EQ(resSecond.to_double(), 539.0);
+
+    return true;
+}
+
+bool test_direct_multiplying_integer_by_float()
+{
+    auto integerFirst = strict::integer_t{51};
+    auto integerSecond = strict::integer_t{51};
+
+    integerFirst *= strict::float32_3d_t{10};
+    integerSecond *= strict::float32_3d_t{10, 567};
+
+    ASSERT_EQ(integerFirst.to_string(), "510");
+    ASSERT_EQ(integerFirst.to_float(), 510.0f);
+    ASSERT_EQ(integerFirst.to_double(), 510.0);
+
+    ASSERT_EQ(integerSecond.to_string(), "539");  // exactly it is 538.917 rounded up to 539
+    ASSERT_EQ(integerSecond.to_float(), 539.0f);
+    ASSERT_EQ(integerSecond.to_double(), 539.0);
+
+    return true;
+}
+
+bool test_divide_floats_by_strict_integers()
+{
+    auto f = strict::float32_3d_t{100.123};
+    const auto i = strict::integer_t{10};
+
+    const auto res = f / i;
+    f /= i;
+
+    ASSERT_EQ(res.to_string(), "10.012");
+    ASSERT_EQ(res.to_float(), 10.012f);
+    ASSERT_EQ(res.to_double(), 10.012);
+
+    ASSERT_EQ(f.to_string(), "10.012");
+    ASSERT_EQ(f.to_float(), 10.012f);
+    ASSERT_EQ(f.to_double(), 10.012);
+    return true;
+}
+
+bool test_divide_strict_integers()
+{
+    auto first = strict::integer_t{51};
+    const auto second = strict::integer_t{10};
+
+    const auto res = first / second;
+    first /= second;
+
+    ASSERT_EQ(res.to_string(), "5");
+    ASSERT_EQ(res.to_float(), 5.0f);
+    ASSERT_EQ(res.to_double(), 5.0);
+
+    ASSERT_EQ(first.to_string(), "5");
+    ASSERT_EQ(first.to_float(), 5.0f);
+    ASSERT_EQ(first.to_double(), 5.0);
+    return true;
+}
+
+bool test_divide_integer_by_float()
+{
+    auto integer = strict::integer_t{51};
+    const auto floatFirst = strict::float32_3d_t{10};
+    const auto floatSecond = strict::float32_3d_t{10, 567};
+
+    const auto resFirst = integer / floatFirst;
+    const auto resSecond = integer / floatSecond;
+
+    ASSERT_EQ(resFirst.to_string(), "5");
+    ASSERT_EQ(resFirst.to_float(), 5.0f);
+    ASSERT_EQ(resFirst.to_double(), 5.0);
+
+    ASSERT_EQ(resSecond.to_string(), "5");  // exactly it is 4,826346172045046 rounded up to 5
+    ASSERT_EQ(resSecond.to_float(), 5.0f);
+    ASSERT_EQ(resSecond.to_double(), 5.0);
+    return true;
+}
+
+bool test_direct_divide_integer_by_float()
+{
+    auto integerFirst = strict::integer_t{51};
+    auto integerSecond = strict::integer_t{51};
+
+    integerFirst /= strict::float32_3d_t{10};
+    integerSecond /= strict::float32_3d_t{10, 567};
+
+    ASSERT_EQ(integerFirst.to_string(), "5");
+    ASSERT_EQ(integerFirst.to_float(), 5.0f);
+    ASSERT_EQ(integerFirst.to_double(), 5.0);
+
+    ASSERT_EQ(integerSecond.to_string(), "5");  // exactly it is 538.917 rounded up to 539
+    ASSERT_EQ(integerSecond.to_float(), 5.0f);
+    ASSERT_EQ(integerSecond.to_double(), 5.0);
+    return true;
+}
