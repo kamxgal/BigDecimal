@@ -453,6 +453,7 @@ max(const decimal_t<UnderlyingType, Precision>& first, const decimal_t<Underlyin
 using integer_t = decimal_t<int, 0>;
 using size_t = decimal_t<size_t, 0>;
 using float32_3d_t = decimal_t<int32_t, 3>;
+using float32_2d_t = decimal_t<int32_t, 2>;
 using ratio32_t = ranged_decimal_t<int32_t, 5, 0, 1>;
 
 }  // namespace strict
