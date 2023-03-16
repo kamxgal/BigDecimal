@@ -1011,6 +1011,14 @@ bool test_multiplying_integer_by_float()
     ASSERT_EQ(resSecond.to_float(), 539.0f);
     ASSERT_EQ(resSecond.to_double(), 539.0);
 
+    auto integer2 = strict::integer_t{38148};
+    auto ratio = strict::ratio64_t{0, 96748};
+    const auto res = integer2 * ratio;
+
+    ASSERT_EQ(res.to_string(), "36907");
+    ASSERT_EQ(res.to_float(), 36907.0f);
+    ASSERT_EQ(res.to_double(), 36907.0);
+
     return true;
 }
 
@@ -1103,5 +1111,21 @@ bool test_direct_divide_integer_by_float()
     ASSERT_EQ(integerSecond.to_string(), "5");  // exactly it is 538.917 rounded up to 539
     ASSERT_EQ(integerSecond.to_float(), 5.0f);
     ASSERT_EQ(integerSecond.to_double(), 5.0);
+    return true;
+}
+
+bool test_comparison_operators()
+{
+    const auto number = decimal3d_t{20.1};
+    ASSERT_TRUE(number == decimal3d_t{20.1});
+    ASSERT_TRUE(number != decimal3d_t{20});
+
+    ASSERT_TRUE(number > decimal3d_t{20});
+    ASSERT_TRUE(number >= decimal3d_t{20});
+    ASSERT_TRUE(number >= decimal3d_t{20.1});
+
+    ASSERT_TRUE(number < decimal3d_t{30});
+    ASSERT_TRUE(number <= decimal3d_t{30});
+    ASSERT_TRUE(number <= decimal3d_t{20.1});
     return true;
 }

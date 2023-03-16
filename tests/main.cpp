@@ -104,6 +104,8 @@ void RunDecimalTests(TestSuite& testSuite)
     EXECUTE_TEST(testSuite, test_divide_strict_integers);
     EXECUTE_TEST(testSuite, test_divide_integer_by_float);
     EXECUTE_TEST(testSuite, test_direct_divide_integer_by_float);
+
+    EXECUTE_TEST(testSuite, test_comparison_operators);
 }
 
 void RunRangedDecimalTests(TestSuite& testSuite)

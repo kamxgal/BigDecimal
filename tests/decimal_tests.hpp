@@ -97,3 +97,5 @@ bool test_divide_floats_by_strict_integers();
 bool test_divide_strict_integers();
 bool test_divide_integer_by_float();
 bool test_direct_divide_integer_by_float();
+
+bool test_comparison_operators();
