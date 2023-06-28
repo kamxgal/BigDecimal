@@ -339,6 +339,17 @@ bool test_dividing_two_decimals()
     ASSERT_EQ(number3.to_string(), "1.00");
     ASSERT_EQ(number3.to_double(), 1.0);
     ASSERT_EQ(number3.to_float(), 1.0f);
+
+    decimal2d_t number4 = decimal2d_t{8000} / decimal2d_t{100};
+    ASSERT_EQ(number4.to_string(), "80.00");
+    ASSERT_EQ(number4.to_double(), 80.0);
+    ASSERT_EQ(number4.to_float(), 80.0f);
+
+    decimal3d_t number5 = decimal3d_t{8000} / decimal3d_t{100};
+    ASSERT_EQ(number5.to_string(), "80.000");
+    ASSERT_EQ(number5.to_double(), 80.0);
+    ASSERT_EQ(number5.to_float(), 80.0f);
+
     return true;
 }
 

@@ -223,8 +223,9 @@ struct decimal_t
         return *this;
     }
 
-    template<typename RhsUnderlyingType, int RhsPrecision>
-    decimal_t<underlying_type, PRECISION>& operator/=(const decimal_t<RhsUnderlyingType, RhsPrecision>& rhs) {
+    template <typename RhsUnderlyingType, int RhsPrecision, std::enable_if_t<PRECISION != RhsPrecision, bool> = true>
+    decimal_t<underlying_type, PRECISION>& operator/=(const decimal_t<RhsUnderlyingType, RhsPrecision>& rhs)
+    {
         if (mNominator.value == 0 && rhs.nominator() == 0) {
             mNominator.value = NAN_VALUE;
             return *this;
@@ -233,6 +234,7 @@ struct decimal_t
             mNominator.value = mNominator.value >= 0 ? INFINITY_PLUS : INFINITY_MINUS;
             return *this;
         }
+
         using OperationType = std::conditional_t<sizeof(underlying_type) >= sizeof(RhsUnderlyingType), underlying_type, RhsUnderlyingType>;
         OperationType res = static_cast<OperationType>(mNominator.value);
         res *= Power10<OperationType>(RhsPrecision+1);
@@ -240,6 +242,36 @@ struct decimal_t
         OperationType signFactor = res >= 0 ? 1 : -1;
         int lastSignificantDigit = std::abs(res) % 10;
         res /= 10;
+        res += lastSignificantDigit >= 5 ? signFactor : 0;
+        mNominator.value = static_cast<UnderlyingType>(res);
+        return *this;
+    }
+
+    template <typename RhsUnderlyingType>
+    decimal_t<underlying_type, PRECISION>& operator/=(const decimal_t<RhsUnderlyingType, PRECISION>& rhs)
+    {
+        if (mNominator.value == 0 && rhs.nominator() == 0) {
+            mNominator.value = NAN_VALUE;
+            return *this;
+        }
+        if (rhs.nominator() == 0) {
+            mNominator.value = mNominator.value >= 0 ? INFINITY_PLUS : INFINITY_MINUS;
+            return *this;
+        }
+
+        using OperationType = std::conditional_t<sizeof(underlying_type) >= sizeof(RhsUnderlyingType), underlying_type, RhsUnderlyingType>;
+        OperationType integerPart = std::abs(integer_part()) * Power10<OperationType>(PRECISION + 1);
+        OperationType fractionPart = fraction_part() * Power10<OperationType>(1);
+
+        OperationType signFactor = std::clamp<OperationType>(nominator(), -1, 1) * std::clamp<OperationType>(rhs.nominator(), -1, 1);
+
+        integerPart = static_cast<int>(1.0 * integerPart / std::fabs(rhs.to_double()));
+        fractionPart = static_cast<int>(1.0 * fractionPart / std::fabs(rhs.to_double()));
+
+        OperationType res = integerPart + fractionPart;
+        int lastSignificantDigit = std::abs(res) % 10;
+        res /= 10;
+        res *= signFactor;
         res += lastSignificantDigit >= 5 ? signFactor : 0;
         mNominator.value = static_cast<UnderlyingType>(res);
         return *this;
