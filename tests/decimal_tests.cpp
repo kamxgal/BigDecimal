@@ -268,6 +268,10 @@ bool test_constructing_decimal_from_string_and_parsing()
     ASSERT_EQ(decimal2d_t("10.499").to_double(), 10.5);
     ASSERT_EQ(decimal2d_t("10.499").to_float(), 10.5f);
     ASSERT_EQ(decimal2d_t("10.499").to_string(), "10.50");
+
+    ASSERT_EQ(decimal2d_t("10").to_double(), 10.0);
+    ASSERT_EQ(decimal2d_t("10").to_float(), 10.0f);
+    ASSERT_EQ(decimal2d_t("10").to_string(), "10.00");
     return true;
 }
 

@@ -95,8 +95,14 @@ struct decimal_t
         std::istringstream ss(num);
         ss >> integerPart >> dotPlaceholder >> fractionPart;
         const ::size_t dotPos = num.find('.');
-        int fractionPartLen = static_cast<int>(num.size() - dotPos - 1);
-        fractionPart *= fractionPartLen >= PRECISION ? UnderlyingType{1} : Power10<UnderlyingType>(PRECISION - fractionPartLen);
+
+        if (dotPos == std::string::npos) {
+            fractionPart = 0;
+        } else {
+            int fractionPartLen = static_cast<int>(num.size() - dotPos - 1);
+            fractionPart *= fractionPartLen >= PRECISION ? UnderlyingType{1} : Power10<UnderlyingType>(PRECISION - fractionPartLen);
+        }
+
         mNominator = decimal_t{integerPart, fractionPart}.mNominator;
     }
 
