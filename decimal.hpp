@@ -45,6 +45,7 @@
 #include <numeric>
 #include <string>
 #include <sstream>
+#include <iostream>
 
 namespace strict
 {
@@ -293,8 +294,8 @@ struct decimal_t
 
         OperationType signFactor = std::clamp<OperationType>(nominator(), -1, 1) * std::clamp<OperationType>(rhs.nominator(), -1, 1);
 
-        integerPart = static_cast<int>(1.0 * integerPart / std::fabs(rhs.to_double()));
-        fractionPart = static_cast<int>(1.0 * fractionPart / std::fabs(rhs.to_double()));
+        integerPart = static_cast<OperationType>(std::llround(1.0 * integerPart / std::fabs(rhs.to_double())));
+        fractionPart = static_cast<OperationType>(std::llround(1.0 * fractionPart / std::fabs(rhs.to_double())));
 
         OperationType res = integerPart + fractionPart;
         int lastSignificantDigit = std::abs(res) % 10;
