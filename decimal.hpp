@@ -46,7 +46,6 @@
 #include <string>
 #include <sstream>
 
-
 namespace strict
 {
 
@@ -72,6 +71,27 @@ constexpr RetT Power10(int n) noexcept {
     }
     return res;
 }
+
+template<typename LhsT, typename RhsT>
+struct select_operating_type
+{
+#if defined(__GNUC__) || defined(__clang__)
+    // If GCC or Clang, use 128-bit for intermediate multiplication
+    // (Be mindful: MSVC doesn't support __int128).
+    using type = __int128;
+#else
+    // Otherwise, just pick the larger of the two underlying types
+    using type = std::conditional_t<
+        (sizeof(LhsT) >= sizeof(RhsT)),
+        LhsT,
+        RhsT
+        >;
+#endif
+};
+
+// Convenience alias to avoid writing `typename select_operating_type<...>::type`
+template<typename LhsT, typename RhsT>
+using select_operating_type_t = typename select_operating_type<LhsT, RhsT>::type;
 
 template<typename UnderlyingType = int64_t, int Precision = 2>
 struct decimal_t
@@ -109,9 +129,11 @@ struct decimal_t
     template<typename FloatingT,
              std::enable_if_t<std::is_floating_point<FloatingT>::value, bool> = true>
     explicit decimal_t(FloatingT num) {
-        int lastDigit = static_cast<underlying_type>(std::abs(num) * DENOMINATOR * 10) % 10;
-        underlying_type signFactor = num >=0 ? 1 : -1;
-        mNominator.value = static_cast<UnderlyingType>(num * DENOMINATOR) + (lastDigit >= 5 ? signFactor : 0);
+        const UnderlyingType temp = static_cast<UnderlyingType>(std::round(num * DENOMINATOR * 10));
+        const int lastDigit = std::abs(temp) % 10;
+        underlying_type signFactor = temp >=0 ? 1 : -1;
+        mNominator.value = static_cast<UnderlyingType>(temp / 10);
+        mNominator.value += lastDigit >= 5 ? signFactor : 0;
     }
 
     template<typename IntegralT,
@@ -197,7 +219,7 @@ struct decimal_t
 
     template<typename RhsUnderlyingType, int RhsDecimalPrecision>
     decimal_t<underlying_type, PRECISION>& operator*=(const decimal_t<RhsUnderlyingType, RhsDecimalPrecision>& rhs) {
-        using OperatingType = std::conditional_t<sizeof(underlying_type) >= sizeof(RhsUnderlyingType), underlying_type, RhsUnderlyingType>;
+        using OperatingType = select_operating_type_t<underlying_type, RhsUnderlyingType>;
         const OperatingType integerPart = static_cast<OperatingType>(this->integer_part());
         OperatingType fractionPart = static_cast<OperatingType>(this->fraction_part());
         const OperatingType rhsIntegerPart = static_cast<OperatingType>(rhs.integer_part());
@@ -241,7 +263,7 @@ struct decimal_t
             return *this;
         }
 
-        using OperationType = std::conditional_t<sizeof(underlying_type) >= sizeof(RhsUnderlyingType), underlying_type, RhsUnderlyingType>;
+        using OperationType = select_operating_type_t<underlying_type, RhsUnderlyingType>;
         OperationType res = static_cast<OperationType>(mNominator.value);
         res *= Power10<OperationType>(RhsPrecision+1);
         res /= static_cast<OperationType>(rhs.nominator());
@@ -265,7 +287,7 @@ struct decimal_t
             return *this;
         }
 
-        using OperationType = std::conditional_t<sizeof(underlying_type) >= sizeof(RhsUnderlyingType), underlying_type, RhsUnderlyingType>;
+        using OperationType = select_operating_type_t<underlying_type, RhsUnderlyingType>;
         OperationType integerPart = std::abs(integer_part()) * Power10<OperationType>(PRECISION + 1);
         OperationType fractionPart = fraction_part() * Power10<OperationType>(1);
 

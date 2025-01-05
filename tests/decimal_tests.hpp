@@ -40,6 +40,7 @@
 
 
 bool test_constructing_decimal_from_double_and_parsing_to_string();
+bool test_constructing_decimal_from_negative_double_and_parsing_to_string();
 bool test_constructing_decimal_from_double_with_fraction_part_around_half();
 bool test_constructing_decimal_from_float_and_parsing_to_float();
 bool test_constructing_decimal_from_double_and_parsing_to_double();
@@ -99,3 +100,5 @@ bool test_divide_integer_by_float();
 bool test_direct_divide_integer_by_float();
 
 bool test_comparison_operators();
+
+bool test_double_to_decimal();

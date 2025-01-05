@@ -61,6 +61,25 @@ bool test_constructing_decimal_from_double_and_parsing_to_string()
     return true;
 }
 
+bool test_constructing_decimal_from_negative_double_and_parsing_to_string()
+{
+    ASSERT_EQ(decimal2d_t{-10.11}.to_string(), "-10.11");
+    ASSERT_EQ(decimal2d_t{-10.110}.to_string(), "-10.11");
+    ASSERT_EQ(decimal2d_t{-10.111}.to_string(), "-10.11");
+    ASSERT_EQ(decimal2d_t{-10.112}.to_string(), "-10.11");
+    ASSERT_EQ(decimal2d_t{-10.113}.to_string(), "-10.11");
+    ASSERT_EQ(decimal2d_t{-10.114}.to_string(), "-10.11");
+    ASSERT_EQ(decimal2d_t{-10.115}.to_string(), "-10.12");
+    ASSERT_EQ(decimal2d_t{-10.116}.to_string(), "-10.12");
+    ASSERT_EQ(decimal2d_t{-10.117}.to_string(), "-10.12");
+    ASSERT_EQ(decimal2d_t{-10.118}.to_string(), "-10.12");
+    ASSERT_EQ(decimal2d_t{-10.119}.to_string(), "-10.12");
+    ASSERT_EQ(decimal2d_t{-10.120}.to_string(), "-10.12");
+    ASSERT_EQ(decimal2d_t{-10.12}.to_string(), "-10.12");
+    return true;
+}
+
+
 bool test_constructing_decimal_from_double_with_fraction_part_around_half()
 {
     ASSERT_EQ(decimal2d_t{43.4999999999991}.to_string(), "43.50");
@@ -1142,5 +1161,23 @@ bool test_comparison_operators()
     ASSERT_TRUE(number < decimal3d_t{30});
     ASSERT_TRUE(number <= decimal3d_t{30});
     ASSERT_TRUE(number <= decimal3d_t{20.1});
+    return true;
+}
+
+bool test_double_to_decimal()
+{
+    using decimal64_2d_t = strict::decimal_t<int64_t, 2>;
+    const double price = 71.91;
+    const double fraction = 500.0 / 9000.0;
+    const auto number = decimal64_2d_t(price * fraction);
+    ASSERT_EQ(number.nominator(), 400);
+
+    const auto val1 = decimal2d_t{10.116};
+    const auto val2 = decimal2d_t{-10.116};
+    std::cout << "val1=" << val1.nominator() << std::endl;
+    std::cout << "val2=" << val2.nominator() << std::endl;
+    std::cout << "-10.114=" << decimal2d_t{-10.114}.nominator() << std::endl;
+    std::cout << "-10.115=" << decimal2d_t{-10.115}.nominator() << std::endl;
+    std::cout << "-10.116=" << decimal2d_t{-10.116}.nominator() << std::endl;
     return true;
 }

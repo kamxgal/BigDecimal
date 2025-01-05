@@ -43,6 +43,7 @@
 void RunDecimalTests(TestSuite& testSuite)
 {
     EXECUTE_TEST(testSuite, test_constructing_decimal_from_double_and_parsing_to_string);
+    EXECUTE_TEST(testSuite, test_constructing_decimal_from_negative_double_and_parsing_to_string);
     EXECUTE_TEST(testSuite, test_constructing_decimal_from_double_with_fraction_part_around_half);
     EXECUTE_TEST(testSuite, test_constructing_decimal_from_float_and_parsing_to_float);
     EXECUTE_TEST(testSuite, test_constructing_decimal_from_double_and_parsing_to_double);
@@ -106,6 +107,8 @@ void RunDecimalTests(TestSuite& testSuite)
     EXECUTE_TEST(testSuite, test_direct_divide_integer_by_float);
 
     EXECUTE_TEST(testSuite, test_comparison_operators);
+
+    EXECUTE_TEST(testSuite, test_double_to_decimal);
 }
 
 void RunRangedDecimalTests(TestSuite& testSuite)
